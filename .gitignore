@@ -1,0 +1,13 @@
+# Gradle
+build
+.log
+.gradle
+!gradle-wrapper.jar
+
+# IntelliJ
+*.iml
+.idea
+!.idea/codeStyles/*
+
+# Other
+.DS_Store
