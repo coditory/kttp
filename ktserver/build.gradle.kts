@@ -7,6 +7,10 @@ plugins {
 description = "KtServer - Kotlin async http server"
 
 dependencies {
-    implementation(libs.coroutines.core)
     implementation(libs.kotlin.reflect)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.json.io)
+    implementation(libs.kotlinx.coroutines.core)
+    api(libs.kotlinx.io.core)
+    implementation(libs.quark.uri)
 }

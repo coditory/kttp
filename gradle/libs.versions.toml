@@ -4,20 +4,28 @@ java = "21"
 kotlin = "2.1.20"
 coroutines = "1.9.0"
 ktlint = "1.4.0"
+# Dependencies
+serialization = "1.8.1"
+kotlinx-io = "0.7.0"
 # Test dependencies
 kotest = "5.9.1"
 
 [libraries]
 # Build logic
 gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradle-kotlin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 gradle-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version = "12.0.2" }
 gradle-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.20" }
 gradle-kover = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version = "0.9.0" }
 gradle-nexusPublish = { module = "io.github.gradle-nexus:publish-plugin", version = "1.1.0" }
 # Dependencies
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
-slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.17" }
+kotlin-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-serialization-json-io = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-io", version.ref = "serialization" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
+quark-uri = { module = "com.coditory.quark:quark-uri", version = "0.0.10" }
 # Test dependencies
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
