@@ -8,18 +8,18 @@ interface HttpRoute {
     fun handler(handler: HttpHandler)
 
     fun get(path: String, produces: String?, action: HttpAction) {
-        handler(HttpHandler(HttpRequestMethod.GET, path, produces, action))
+        handler(SimpleHttpHandler(HttpRequestMethod.GET, path, produces, action))
     }
 
     fun post(path: String, produces: String?, action: HttpAction) {
-        handler(AsyncHttpHandler(HttpRequestMethod.POST, path, produces, action))
+        handler(SimpleHttpHandler(HttpRequestMethod.POST, path, produces, action))
     }
 
     fun put(path: String, produces: String?, action: HttpAction) {
-        handler(AsyncHttpHandler(HttpRequestMethod.PUT, path, produces, action))
+        handler(SimpleHttpHandler(HttpRequestMethod.PUT, path, produces, action))
     }
 
     fun delete(path: String, produces: String?, action: HttpAction) {
-        handler(AsyncHttpHandler(HttpRequestMethod.DELETE, path, produces, action))
+        handler(SimpleHttpHandler(HttpRequestMethod.DELETE, path, produces, action))
     }
 }

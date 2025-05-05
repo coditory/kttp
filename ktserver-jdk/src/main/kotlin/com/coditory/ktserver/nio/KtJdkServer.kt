@@ -1,89 +1,49 @@
 package com.coditory.ktserver.nio
 
+import com.coditory.ktserver.HttpExchange
+import com.coditory.ktserver.HttpSerDeserializer
 import com.coditory.ktserver.HttpServer
+import com.coditory.ktserver.http.HttpParams
+import com.coditory.ktserver.http.HttpRequest
+import com.coditory.ktserver.http.HttpRequestMethod
+import com.coditory.ktserver.serialization.ScoredHttpSerDeserializer
 import com.coditory.quark.uri.Ports
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.io.Buffer
 import kotlinx.io.asSource
 import kotlinx.io.buffered
-import kotlinx.io.readString
 import java.net.InetSocketAddress
-import java.nio.channels.AsynchronousServerSocketChannel
-import java.nio.channels.AsynchronousSocketChannel
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import com.sun.net.httpserver.HttpExchange as JdkHttpExchange
 import com.sun.net.httpserver.HttpServer as JdkHttpServer
 
 class KtJdkServer(
     val port: Int = Ports.getNextAvailable(),
     val backlog: Int = 0,
     val requestScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    val serde: HttpSerDeserializer = ScoredHttpSerDeserializer.default(),
 ) : HttpServer {
-    private val server = JdkHttpServer.create(InetSocketAddress(port), 0).apply {
-        executor = null // creates a default executor
+    private val server = JdkHttpServer.create(InetSocketAddress(port), backlog).apply {
+        executor = null // creates a default executor that runs on callers thread
         createContext("/") { exchange ->
             requestScope.launch {
-                val src = exchange.requestBody.asSource().buffered()
-                src.readString()
                 handleRequest(exchange)
             }
         }
     }
 
+    private suspend fun handleRequest(srcExchange: JdkHttpExchange) {
+        val request = HttpRequest(
+            method = HttpRequestMethod.valueOf(srcExchange.requestMethod),
+            uri = srcExchange.requestURI,
+            headers = HttpParams.fromMultiMap(srcExchange.requestHeaders.toMap()),
+            deserializer = serde,
+            source = srcExchange.requestBody.asSource().buffered(),
+        )
+        val exchange = HttpExchange(request = request)
+    }
+
     override fun start() {
-        val server = AsynchronousServerSocketChannel.open().bind(InetSocketAddress(port), backlog)
-        runBlocking {
-            val channel = accept(server)
-            val asyncChannel = HttpAsyncSocketChannel(channel)
-            Buffer
-        }
-    }
-
-    suspend fun accept(server: AsynchronousServerSocketChannel): AsynchronousSocketChannel {
-        suspendCancellableCoroutine { cont ->
-            server.accept(
-                null,
-                object : java.nio.channels.CompletionHandler<AsynchronousSocketChannel, Void?> {
-                    override fun completed(result: AsynchronousSocketChannel, attachment: Void?) {
-                        cont.resume(result)
-                    }
-
-                    override fun failed(exc: Throwable, attachment: Void?) {
-                        cont.resumeWithException(exc)
-                    }
-                },
-            )
-        }
-    }
-
-    private suspend fun handleRequest(channel: HttpAsyncSocketChannel) {
-        try {
-            // Read the request from the client
-            val requestLine = source.readUtf8Line()
-            println("Received request: $requestLine")
-
-            // Prepare an HTTP-like response
-            val body = "Hello from non-blocking Okio!"
-            val response = """
-            HTTP/1.1 200 OK
-            Content-Type: text/plain
-            Content-Length: ${body.length}
-
-            $body
-            """.trimIndent()
-
-            // Write the response to the client
-            sink.writeUtf8(response)
-            sink.flush()
-        } catch (e: Exception) {
-            println("Error while handling client: ${e.message}")
-        } finally {
-            channel.close()
-        }
     }
 
     override fun stop() {

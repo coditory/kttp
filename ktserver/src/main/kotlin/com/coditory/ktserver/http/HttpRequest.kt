@@ -16,7 +16,7 @@ class HttpRequest(
     suspend fun readBodyAsString() = source.readString()
 
     suspend fun <T> readBodyAs(strategy: DeserializationStrategy<T>): T {
-        return deserializer.deserialize(this, strategy)
+        return deserializer.deserialize(strategy, toHttpRequestHead(), source)
     }
 
     fun toHttpRequestHead() = HttpRequestHead(

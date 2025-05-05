@@ -11,12 +11,17 @@ interface HttpHandler {
 }
 
 class SimpleHttpHandler(
-    val method: HttpRequestMethod,
+    val method: HttpRequestMethod? = null,
     override val pathPattern: PathPattern,
-    val consumes: String,
+    val consumes: String? = null,
+    val produces: String? = null,
 ) : HttpHandler {
     override fun matches(request: HttpRequest): Boolean {
-        return request.method == method && pathPattern.matches(request.uri.path)
+        if (method != null && method != request.method) return false
+        if (!pathPattern.matches(request.uri.path)) return false
+        if (consumes == null && produces == null) return true
+
+        return pathPattern.matches(request.uri.path)
     }
 
     override suspend fun handle(exchange: HttpExchange) {
