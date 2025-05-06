@@ -4,10 +4,11 @@ plugins {
     id("build.publish")
 }
 
-description = "KtServer based on Java non-blocking I/O"
+description = "KtServer - implementation with JDK HttpServer"
 
 dependencies {
-    api(project(":ktserver"))
+    api(project(":ktserver-core"))
+    implementation(project(":ktserver-core"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.quark.uri)
 }

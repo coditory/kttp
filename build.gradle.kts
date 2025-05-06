@@ -10,11 +10,13 @@ allprojects {
 }
 
 dependencies {
-    project(":ktserver")
+    project(":ktserver-api")
+    project(":ktserver-core")
     project(":ktserver-jdk")
     project(":ktserver-sample")
 
     // merged coverage report
-    kover(project(":ktserver"))
+    kover(project(":ktserver-api"))
+    kover(project(":ktserver-core"))
     kover(project(":ktserver-jdk"))
 }

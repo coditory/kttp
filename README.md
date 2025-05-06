@@ -17,3 +17,12 @@ dependencies {
   implementation("com.coditory.ktserver:ktserver-jdk:$version")
 }
 ```
+
+## TBD
+
+- Check nested routing
+- Check 404 and error handling
+- Upload file
+- Serve files
+- Websocket
+- klog api

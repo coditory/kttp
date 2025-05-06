@@ -1,56 +1,46 @@
 package com.coditory.ktserver.nio
 
-import com.coditory.ktserver.HttpExchange
+import com.coditory.ktserver.HttpAction
+import com.coditory.ktserver.HttpErrorHandler
+import com.coditory.ktserver.HttpRoute
 import com.coditory.ktserver.HttpSerDeserializer
 import com.coditory.ktserver.HttpServer
-import com.coditory.ktserver.http.HttpParams
-import com.coditory.ktserver.http.HttpRequest
-import com.coditory.ktserver.http.HttpRequestMethod
+import com.coditory.ktserver.NotFoundHttpAction
 import com.coditory.ktserver.serialization.ScoredHttpSerDeserializer
 import com.coditory.quark.uri.Ports
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.io.asSource
-import kotlinx.io.buffered
 import java.net.InetSocketAddress
-import com.sun.net.httpserver.HttpExchange as JdkHttpExchange
 import com.sun.net.httpserver.HttpServer as JdkHttpServer
 
 class KtJdkServer(
     val port: Int = Ports.getNextAvailable(),
-    val backlog: Int = 0,
-    val requestScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    val serde: HttpSerDeserializer = ScoredHttpSerDeserializer.default(),
+    backlog: Int = 0,
+    requestScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    serde: HttpSerDeserializer = ScoredHttpSerDeserializer.default(),
+    notFoundAction: HttpAction = NotFoundHttpAction(),
+    errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
 ) : HttpServer {
+    private val router = KtJdkHttpRouter(
+        requestScope = requestScope,
+        notFoundAction = notFoundAction,
+        errorHandler = errorHandler,
+        serde = serde,
+    )
     private val server = JdkHttpServer.create(InetSocketAddress(port), backlog).apply {
         executor = null // creates a default executor that runs on callers thread
-        createContext("/") { exchange ->
-            requestScope.launch {
-                handleRequest(exchange)
-            }
-        }
-    }
-
-    private suspend fun handleRequest(srcExchange: JdkHttpExchange) {
-        val request = HttpRequest(
-            method = HttpRequestMethod.valueOf(srcExchange.requestMethod),
-            uri = srcExchange.requestURI,
-            headers = HttpParams.fromMultiMap(srcExchange.requestHeaders.toMap()),
-            deserializer = serde,
-            source = srcExchange.requestBody.asSource().buffered(),
-        )
-        val exchange = HttpExchange(request = request)
+        createContext("/", router)
     }
 
     override fun start() {
+        server.start()
     }
 
     override fun stop() {
-        TODO("Not yet implemented")
+        server.stop(5)
     }
 
-    override fun route(path: String) {
-        TODO("Not yet implemented")
+    override fun routing(config: HttpRoute.() -> Unit) {
+        router.routing(config)
     }
 }

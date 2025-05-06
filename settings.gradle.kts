@@ -1,7 +1,8 @@
 rootProject.name = "ktserver"
 
 includeBuild("build-logic")
-include("ktserver")
+include("ktserver-api")
+include("ktserver-core")
 include("ktserver-jdk")
 include("ktserver-sample")
 
