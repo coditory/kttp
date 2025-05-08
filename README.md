@@ -14,15 +14,20 @@ Add dependency to `build.gradle.kts`:
 
 ```kts
 dependencies {
-  implementation("com.coditory.ktserver:ktserver-jdk:$version")
+  implementation("com.coditory.kttp:kttp-server-jdk:$version")
 }
 ```
 
 ## TBD
 
+- Rename to kttp
 - Check nested routing
 - Check 404 and error handling
+- Handle head
+- Handle 405 response - Method not allowed
+- Handle 406 response - Not Acceptable
 - Upload file
 - Serve files
 - Websocket
 - klog api
+- kttp client

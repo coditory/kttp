@@ -1,11 +1,12 @@
 package com.coditory.ktserver.http
 
 data class PathPattern(
-    private val pattern: String,
+    val pattern: String,
 ) : Comparable<PathPattern> {
     private val regex: Regex by lazy {
         val starChars = "a-zA-Z0-9-_"
         val pattern = pattern
+            .replace(Regex("\\*\\*+"), "**")
             .replace("**", "[$starChars/]+")
             .replace("*", "[$starChars]+")
         Regex(pattern)
@@ -13,15 +14,6 @@ data class PathPattern(
 
     fun matches(path: String): Boolean {
         return regex.matches(path)
-    }
-
-    fun prefix(path: String): PathPattern {
-        val combined = (path + "/" + this.pattern)
-            .replace(Regex("/+"), "/")
-            .replace(Regex("/$"), "")
-            .replace("/?", "?")
-            .replace("/#", "#")
-        return PathPattern(combined)
     }
 
     override fun compareTo(other: PathPattern): Int {

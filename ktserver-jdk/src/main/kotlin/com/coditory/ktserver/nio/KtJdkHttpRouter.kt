@@ -1,13 +1,13 @@
 package com.coditory.ktserver.nio
 
 import com.coditory.klog.Klog
-import com.coditory.ktserver.HttpAction
 import com.coditory.ktserver.HttpCompositeRouter
 import com.coditory.ktserver.HttpErrorHandler
 import com.coditory.ktserver.HttpExchange
+import com.coditory.ktserver.HttpHandler
 import com.coditory.ktserver.HttpRoute
 import com.coditory.ktserver.HttpSerDeserializer
-import com.coditory.ktserver.NotFoundHttpAction
+import com.coditory.ktserver.NotFoundHttpHandler
 import com.coditory.ktserver.http.HttpParams
 import com.coditory.ktserver.http.HttpRequest
 import com.coditory.ktserver.http.HttpRequestMethod
@@ -23,15 +23,16 @@ import com.sun.net.httpserver.HttpHandler as JdkHttpHandler
 @OptIn(DelicateCoroutinesApi::class)
 internal class KtJdkHttpRouter(
     private val requestScope: CoroutineScope,
+    private val responseSendingScope: CoroutineScope,
     private val serde: HttpSerDeserializer,
-    notFoundAction: HttpAction = NotFoundHttpAction(),
+    notFoundAction: HttpHandler = NotFoundHttpHandler(),
     errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
 ) : JdkHttpHandler {
     private val log = Klog.logger(KtJdkHttpRouter::class)
     private val router = HttpCompositeRouter(
         notFoundAction = notFoundAction,
         errorHandler = errorHandler,
-        responseSender = KtJdkHttpResponseSender(serde),
+        responseSender = KtJdkHttpResponseSender(serde, responseSendingScope),
     )
 
     fun routing(config: HttpRoute.() -> Unit) = router.routing(config)

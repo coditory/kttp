@@ -1,32 +1,24 @@
 package com.coditory.ktserver
 
-import com.coditory.ktserver.http.ContentType
-import com.coditory.ktserver.http.HttpRequest
-import com.coditory.ktserver.http.HttpRequestMethod
+import com.coditory.ktserver.http.HttpRequestHead
 import com.coditory.ktserver.http.HttpResponse
-import com.coditory.ktserver.http.PathPattern
 
-interface HttpHandler : HttpAction {
-    val pathPattern: PathPattern
-    fun matches(request: HttpRequest) = pathPattern.matches(request.uri.path)
+fun interface HttpHandler {
+    suspend fun handle(exchange: HttpExchange): HttpResponse
 }
 
-internal class SimpleHttpHandler(
-    val method: HttpRequestMethod? = null,
-    override val pathPattern: PathPattern,
-    private val consumes: ContentType? = null,
-    private val produces: ContentType? = null,
-    private val action: HttpAction,
-) : HttpHandler {
-    override fun matches(request: HttpRequest): Boolean {
-        if (method != null && method != request.method) return false
-        if (!pathPattern.matches(request.uri.path)) return false
-        if (consumes == null && produces == null) return true
-        // TODO: Negotiate content with Content-Type and Accept
-        return true
-    }
+interface HttpMatchingHandler : HttpHandler {
+    fun matches(request: HttpRequestHead): Boolean
 
-    override suspend fun handle(exchange: HttpExchange): HttpResponse {
-        return action.handle(exchange)
+    companion object {
+        fun matching(matcher: HttpRequestMatcher, handler: HttpHandler): HttpMatchingHandler = HttpCompositeMatchingHandler(matcher, handler)
     }
+}
+
+internal data class HttpCompositeMatchingHandler(
+    val matcher: HttpRequestMatcher,
+    val handler: HttpHandler,
+) : HttpMatchingHandler {
+    override fun matches(request: HttpRequestHead) = matcher.matches(request)
+    override suspend fun handle(exchange: HttpExchange) = handler.handle(exchange)
 }

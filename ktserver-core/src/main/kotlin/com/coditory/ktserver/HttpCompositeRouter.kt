@@ -9,7 +9,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 
 @OptIn(DelicateCoroutinesApi::class)
 class HttpCompositeRouter(
-    notFoundAction: HttpAction = NotFoundHttpAction(),
+    notFoundAction: HttpHandler = NotFoundHttpHandler(),
     private val responseSender: HttpResponseSender = DefaultHttpResponseSender(ScoredHttpSerDeserializer.default()),
     private val errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
 ) {

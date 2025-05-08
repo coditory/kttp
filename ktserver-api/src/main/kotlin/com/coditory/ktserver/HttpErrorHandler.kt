@@ -3,7 +3,7 @@ package com.coditory.ktserver
 import com.coditory.ktserver.http.HttpResponse
 import com.coditory.ktserver.http.HttpStatus
 
-interface HttpErrorHandler {
+fun interface HttpErrorHandler {
     fun handle(exchange: HttpExchange, e: Throwable): HttpResponse
 
     companion object {

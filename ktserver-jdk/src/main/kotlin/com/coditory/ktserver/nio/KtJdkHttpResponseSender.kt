@@ -5,10 +5,13 @@ import com.coditory.ktserver.HttpResponseSender
 import com.coditory.ktserver.HttpSerializer
 import com.coditory.ktserver.http.ContentType
 import com.coditory.ktserver.http.HttpResponse
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import com.sun.net.httpserver.HttpExchange as JdkHttpExchange
 
 class KtJdkHttpResponseSender(
     private val serializer: HttpSerializer,
+    private val writeScope: CoroutineScope,
 ) : HttpResponseSender {
     @Suppress("UNCHECKED_CAST")
     override suspend fun sendResponse(
@@ -22,17 +25,21 @@ class KtJdkHttpResponseSender(
             }
 
             is HttpResponse.StatusResponse -> {
-                jdkExchange.sendResponseHeaders(response.status.code, 0.toLong())
+                writeScope.launch {
+                    jdkExchange.sendResponseHeaders(response.status.code, 0.toLong())
+                }
             }
 
             is HttpResponse.SerializableResponse<*> -> {
                 val resp = response as HttpResponse.SerializableResponse<Any>
                 val req = exchange.request.toHttpRequestHead()
                 val body = serializer.serializeToString(resp.body, resp.serializer, req).toByteArray()
-                jdkExchange.responseHeaders.add("Content-Type", ContentType.Application.Json.value)
-                jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
-                jdkExchange.responseBody.use { out ->
-                    out.write(body)
+                writeScope.launch {
+                    jdkExchange.responseHeaders.add("Content-Type", ContentType.Application.Json.value)
+                    jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
+                    jdkExchange.responseBody.use { out ->
+                        out.write(body)
+                    }
                 }
             }
 
@@ -40,8 +47,10 @@ class KtJdkHttpResponseSender(
                 val body = response.body.toByteArray()
                 jdkExchange.responseHeaders.add("Content-Type", ContentType.Text.Plain.value)
                 jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
-                exchange.responseBody.use { out ->
-                    out.write(body)
+                writeScope.launch {
+                    exchange.responseBody.use { out ->
+                        out.write(body)
+                    }
                 }
             }
         }

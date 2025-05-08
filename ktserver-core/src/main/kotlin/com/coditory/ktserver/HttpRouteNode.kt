@@ -1,13 +1,15 @@
 package com.coditory.ktserver
 
 import com.coditory.ktserver.http.HttpRequest
+import com.coditory.ktserver.http.PathPattern
 
 class HttpRouteNode : HttpRoute {
     private val children = mutableMapOf<String, HttpRouteNode>()
-    private val handlers = mutableListOf<HttpHandler>()
+    private val genericPathChunks = mutableSetOf<String>()
+    private val handlers = mutableListOf<HttpMatchingHandler>()
     private val filters = mutableListOf<HttpFilter>()
 
-    fun getMatchingHandler(request: HttpRequest): HttpHandler? {
+    fun getMatchingHandler(request: HttpRequest): HttpMatchingHandler? {
         return handlers.find { it.matches(request) }
     }
 
@@ -26,8 +28,11 @@ class HttpRouteNode : HttpRoute {
         result.add(this)
         if (chunks.isEmpty()) return
         val key = chunks.first()
-        val child = children[key] ?: return
-        child.aggregate(chunks.drop(1), result)
+        val child = children[key]
+        child?.aggregate(chunks.drop(1), result)
+        genericPathChunks
+            .mapNotNull { children[it] }
+            .forEach { it.aggregate(chunks.drop(1), result) }
     }
 
     fun child(path: String): HttpRouteNode {
@@ -37,13 +42,17 @@ class HttpRouteNode : HttpRoute {
     }
 
     private fun child(chunks: List<String>): HttpRouteNode {
+        if (chunks.isEmpty()) return this
         val key = chunks.first()
         val child = children[key] ?: HttpRouteNode()
         children[key] = child
+        if (PathPattern.isGenericPathChunk(key)) {
+            genericPathChunks.add(key)
+        }
         return child.child(chunks.drop(1))
     }
 
-    fun addHandler(handler: HttpHandler) {
+    fun addHandler(handler: HttpMatchingHandler) {
         handlers.add(handler)
     }
 
@@ -51,7 +60,7 @@ class HttpRouteNode : HttpRoute {
         filters.add(filter)
     }
 
-    override fun context(path: String, config: HttpRoute.() -> Unit) {
+    override fun routing(path: String, config: HttpRoute.() -> Unit) {
         val node = child(path)
         with(node, config)
     }
@@ -60,7 +69,7 @@ class HttpRouteNode : HttpRoute {
         filters.add(filter)
     }
 
-    override fun handler(handler: HttpHandler) {
+    override fun handler(handler: HttpMatchingHandler) {
         handlers.add(handler)
     }
 }
