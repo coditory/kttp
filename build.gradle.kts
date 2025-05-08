@@ -5,18 +5,20 @@ plugins {
 }
 
 allprojects {
-    group = "com.coditory.ktserver"
-    description = "Async Kotlin Http server"
+    group = "com.coditory.kttp"
+    description = "Kotlin HTTP layer"
 }
 
 dependencies {
-    project(":ktserver-api")
-    project(":ktserver-core")
-    project(":ktserver-jdk")
-    project(":ktserver-sample")
+    project(":api")
+    project(":server:api")
+    project(":server:core")
+    project(":server:jdk")
+    project(":server:samples")
 
     // merged coverage report
-    kover(project(":ktserver-api"))
-    kover(project(":ktserver-core"))
-    kover(project(":ktserver-jdk"))
+    kover(project(":api"))
+    kover(project(":server:api"))
+    kover(project(":server:core"))
+    kover(project(":server:jdk"))
 }

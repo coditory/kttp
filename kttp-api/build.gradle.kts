@@ -4,7 +4,7 @@ plugins {
     id("build.publish")
 }
 
-description = "KtServer - API"
+description = "Kttp Server - API"
 
 dependencies {
     implementation(libs.kotlin.reflect)

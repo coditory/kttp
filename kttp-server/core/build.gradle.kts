@@ -4,10 +4,10 @@ plugins {
     id("build.publish")
 }
 
-description = "KtServer - Internal core"
+description = "Kttp Server - Internal core"
 
 dependencies {
-    api(project(":ktserver-api"))
+    api(project(":server:api"))
     api(libs.kotlin.reflect)
     api(libs.kotlinx.serialization.json)
     api(libs.kotlinx.serialization.json.io)

@@ -6,7 +6,7 @@ plugins {
 
 publishing {
     publications.create<MavenPublication>("jvm") {
-        artifactId = project.name
+        artifactId = artifactName()
         from(components["java"])
         versionMapping {
             usage("java-api") {
@@ -19,7 +19,7 @@ publishing {
         pom {
             name.set(project.name)
             description.set(project.description ?: rootProject.description ?: "Kotlin logging library")
-            url.set("https://github.com/coditory/klog")
+            url.set("https://github.com/coditory/kttp")
             organization {
                 name = "Coditory"
                 url = "https://coditory.com"
@@ -38,12 +38,12 @@ publishing {
                 }
             }
             scm {
-                connection.set("scm:git:git://github.com/coditory/klog.git")
-                url.set("https://github.com/coditory/klog")
+                connection.set("scm:git:git://github.com/coditory/kttp.git")
+                url.set("https://github.com/coditory/kttp")
             }
             issueManagement {
                 system.set("GitHub")
-                url.set("https://github.com/coditory/klog/issues")
+                url.set("https://github.com/coditory/kttp/issues")
             }
         }
     }
@@ -59,5 +59,25 @@ signing {
 tasks.javadoc {
     if (JavaVersion.current().isJava9Compatible) {
         (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+    }
+}
+
+tasks.register("artifactName") {
+    doLast {
+        println(artifactName())
+    }
+}
+
+fun artifactName(): String {
+    var result = project.name
+    var proj = project.parent
+    while (proj != null) {
+        result = proj.name + "-" + result
+        proj = proj.parent
+    }
+    return if (result.startsWith("kttp-")) {
+        result
+    } else {
+        "kttp-$result"
     }
 }

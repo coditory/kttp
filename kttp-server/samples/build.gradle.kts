@@ -4,6 +4,8 @@ plugins {
     application
 }
 
+description = "Kttp Server - samples"
+
 application {
     mainClass.set("com.coditory.ktserver.sample.SampleRunner")
 }
@@ -19,5 +21,5 @@ tasks.withType<Jar> {
 }
 
 dependencies {
-    implementation(project(":ktserver-jdk"))
+    implementation(project(":server:jdk"))
 }

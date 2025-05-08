@@ -4,11 +4,11 @@ plugins {
     id("build.publish")
 }
 
-description = "KtServer - implementation with JDK HttpServer"
+description = "Kttp Server - implementation with JDK HttpServer"
 
 dependencies {
-    api(project(":ktserver-core"))
-    implementation(project(":ktserver-core"))
+    api(project(":server:core"))
+    implementation(project(":server:core"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.quark.uri)
 }
