@@ -1,0 +1,36 @@
+package com.coditory.kttp.server
+
+import com.coditory.kttp.ContentType
+import com.coditory.kttp.HttpRequestHead
+import com.coditory.kttp.HttpRequestMethod
+
+fun interface HttpRequestMatcher {
+    fun matches(request: HttpRequestHead): Boolean
+}
+
+internal data class HttpSimpleRequestMatcher(
+    val method: HttpRequestMethod? = null,
+    val pathPattern: PathPattern? = null,
+    val consumes: ContentType? = null,
+    val produces: ContentType? = null,
+) : HttpRequestMatcher {
+    constructor(
+        method: HttpRequestMethod? = null,
+        path: String,
+        consumes: ContentType? = null,
+        produces: ContentType? = null,
+    ) : this(
+        method = method,
+        pathPattern = PathPattern(path),
+        consumes = consumes,
+        produces = produces,
+    )
+
+    override fun matches(request: HttpRequestHead): Boolean {
+        if (method != null && method != request.method) return false
+        if (pathPattern != null && !pathPattern.matches(request.uri.path)) return false
+        if (consumes == null && produces == null) return true
+        // TODO: Negotiate content with Content-Type and Accept
+        return true
+    }
+}
