@@ -6,9 +6,35 @@ import com.coditory.kttp.HttpRequestMethod
 
 fun interface HttpRequestMatcher {
     fun matches(request: HttpRequestHead): Boolean
+
+    companion object {
+        fun from(
+            method: HttpRequestMethod? = null,
+            pathPattern: PathPattern? = null,
+            consumes: ContentType? = null,
+            produces: ContentType? = null,
+        ): HttpRequestMatcher = StaticHttpRequestMatcher(
+            method = method,
+            pathPattern = pathPattern,
+            consumes = consumes,
+            produces = produces,
+        )
+
+        fun from(
+            method: HttpRequestMethod? = null,
+            pathPattern: String,
+            consumes: ContentType? = null,
+            produces: ContentType? = null,
+        ): HttpRequestMatcher = StaticHttpRequestMatcher(
+            method = method,
+            pathPattern = pathPattern,
+            consumes = consumes,
+            produces = produces,
+        )
+    }
 }
 
-internal data class HttpSimpleRequestMatcher(
+private data class StaticHttpRequestMatcher(
     val method: HttpRequestMethod? = null,
     val pathPattern: PathPattern? = null,
     val consumes: ContentType? = null,
@@ -16,12 +42,12 @@ internal data class HttpSimpleRequestMatcher(
 ) : HttpRequestMatcher {
     constructor(
         method: HttpRequestMethod? = null,
-        path: String,
+        pathPattern: String,
         consumes: ContentType? = null,
         produces: ContentType? = null,
     ) : this(
         method = method,
-        pathPattern = PathPattern(path),
+        pathPattern = PathPattern(pathPattern),
         consumes = consumes,
         produces = produces,
     )

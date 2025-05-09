@@ -1,9 +1,9 @@
 package com.coditory.kttp.server.jdk
 
 import com.coditory.kttp.serialization.HttpSerDeserializer
-import com.coditory.kttp.serialization.ScoredHttpSerDeserializer
+import com.coditory.kttp.serialization.SerDeserializer
 import com.coditory.kttp.server.HttpErrorHandler
-import com.coditory.kttp.server.HttpHandler
+import com.coditory.kttp.server.HttpHandlerAction
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.HttpServer
 import com.coditory.kttp.server.core.NotFoundHttpHandler
@@ -18,8 +18,8 @@ class JdkHttpServer(
     backlog: Int = 0,
     requestScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     responseSendingScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
-    serde: HttpSerDeserializer = ScoredHttpSerDeserializer.default(),
-    notFoundAction: HttpHandler = NotFoundHttpHandler(),
+    serde: SerDeserializer = HttpSerDeserializer.default(),
+    notFoundAction: HttpHandlerAction = NotFoundHttpHandler(),
     errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
 ) : HttpServer {
     private val router = JdkHttpRouter(

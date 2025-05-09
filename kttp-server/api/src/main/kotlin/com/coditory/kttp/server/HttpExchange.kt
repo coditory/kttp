@@ -3,7 +3,6 @@ package com.coditory.kttp.server
 import com.coditory.kttp.HttpParams
 import com.coditory.kttp.HttpResponseHead
 import com.coditory.kttp.HttpStatus
-import com.coditory.kttp.MutableHttpParams
 import kotlinx.io.Sink
 import kotlinx.io.writeString
 
@@ -12,7 +11,6 @@ data class HttpExchange(
     val responseBody: Sink,
 ) {
     val attributes = mutableMapOf<String, Any>()
-    val responseHeaders = MutableHttpParams.empty()
     private var sentResponseHead = false
 
     suspend fun sendResponseHead(status: HttpStatus, headers: HttpParams = HttpParams.empty()) {

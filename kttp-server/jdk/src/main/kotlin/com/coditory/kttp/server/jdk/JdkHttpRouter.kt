@@ -3,10 +3,10 @@ package com.coditory.kttp.server.jdk
 import com.coditory.klog.Klog
 import com.coditory.kttp.HttpParams
 import com.coditory.kttp.HttpRequestMethod
-import com.coditory.kttp.serialization.HttpSerDeserializer
+import com.coditory.kttp.serialization.SerDeserializer
 import com.coditory.kttp.server.HttpErrorHandler
 import com.coditory.kttp.server.HttpExchange
-import com.coditory.kttp.server.HttpHandler
+import com.coditory.kttp.server.HttpHandlerAction
 import com.coditory.kttp.server.HttpRequest
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.core.HttpCompositeRouter
@@ -24,8 +24,8 @@ import com.sun.net.httpserver.HttpHandler as JdkHttpHandler
 internal class JdkHttpRouter(
     private val requestScope: CoroutineScope,
     private val responseSendingScope: CoroutineScope,
-    private val serde: HttpSerDeserializer,
-    notFoundAction: HttpHandler = NotFoundHttpHandler(),
+    private val serde: SerDeserializer,
+    notFoundAction: HttpHandlerAction = NotFoundHttpHandler(),
     errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
 ) : JdkHttpHandler {
     private val log = Klog.logger(JdkHttpRouter::class)

@@ -5,27 +5,27 @@ import kotlinx.io.Sink
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 
-interface ScoredHttpSerializer : HttpSerializer {
+interface HttpSerializer : Serializer {
     fun serializationScore(request: HttpRequestHead): Int
 
     companion object {
         fun default() = composite(listOf(JsonSerDeserializer.default(), FormUrlEncodedSerDeserializer.default()))
 
         fun composite(
-            serializers: List<ScoredHttpSerializer>,
-            defaultSerializer: ScoredHttpSerializer? = serializers.first(),
-        ): ScoredHttpSerializer = CompositeSerializer(serializers, defaultSerializer)
+            serializers: List<HttpSerializer>,
+            defaultSerializer: HttpSerializer? = serializers.first(),
+        ): HttpSerializer = CompositeHttpSerializer(serializers, defaultSerializer)
 
-        fun json(json: Json = Json): ScoredHttpSerializer = JsonSerDeserializer(json)
+        fun json(json: Json = Json): HttpSerializer = JsonSerDeserializer(json)
 
-        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat.default()): ScoredHttpSerializer = FormUrlEncodedSerDeserializer(format)
+        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat.default()): HttpSerializer = FormUrlEncodedSerDeserializer(format)
     }
 }
 
-private class CompositeSerializer(
-    private val serializers: List<ScoredHttpSerializer>,
-    private val defaultSerializer: ScoredHttpSerializer? = serializers.first(),
-) : ScoredHttpSerializer {
+private class CompositeHttpSerializer(
+    private val serializers: List<HttpSerializer>,
+    private val defaultSerializer: HttpSerializer? = serializers.first(),
+) : HttpSerializer {
     override fun serializationScore(request: HttpRequestHead): Int {
         return serializers
             .map { it.serializationScore(request) }
@@ -52,7 +52,7 @@ private class CompositeSerializer(
         return serializer.serialize(value, strategy, request, sink)
     }
 
-    private fun findSerializer(request: HttpRequestHead): HttpSerializer {
+    private fun findSerializer(request: HttpRequestHead): Serializer {
         return serializers
             .map { it to it.serializationScore(request) }
             .filter { it.second >= 0 }

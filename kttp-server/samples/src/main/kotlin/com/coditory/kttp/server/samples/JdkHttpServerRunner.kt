@@ -3,7 +3,7 @@ package com.coditory.kttp.server.samples
 import com.coditory.kttp.HttpStatus
 import com.coditory.kttp.server.HttpErrorHandler
 import com.coditory.kttp.server.HttpExchange
-import com.coditory.kttp.server.HttpHandler
+import com.coditory.kttp.server.HttpHandlerAction
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.jdk.JdkHttpServer
 
@@ -11,7 +11,7 @@ object JdkHttpServerRunner {
     @JvmStatic
     fun main(args: Array<String>) {
         val server = JdkHttpServer(
-            notFoundAction = HttpHandler {
+            notFoundAction = HttpHandlerAction {
                 HttpResponse.TextResponse("Not found", HttpStatus.NotFound)
             },
             errorHandler = HttpErrorHandler { ex: HttpExchange, e: Throwable ->

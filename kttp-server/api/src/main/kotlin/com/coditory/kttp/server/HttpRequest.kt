@@ -3,7 +3,7 @@ package com.coditory.kttp.server
 import com.coditory.kttp.HttpParams
 import com.coditory.kttp.HttpRequestHead
 import com.coditory.kttp.HttpRequestMethod
-import com.coditory.kttp.serialization.HttpDeserializer
+import com.coditory.kttp.serialization.Deserializer
 import kotlinx.io.Source
 import kotlinx.io.readString
 import kotlinx.serialization.DeserializationStrategy
@@ -13,16 +13,16 @@ class HttpRequest(
     val method: HttpRequestMethod,
     val uri: URI,
     val headers: HttpParams = HttpParams.empty(),
-    private val deserializer: HttpDeserializer,
+    private val deserializer: Deserializer,
     val source: Source,
 ) {
     suspend fun readBodyAsString() = source.readString()
 
     suspend fun <T> readBodyAs(strategy: DeserializationStrategy<T>): T {
-        return deserializer.deserialize(strategy, toHttpRequestHead(), source)
+        return deserializer.deserialize(strategy, toHead(), source)
     }
 
-    fun toHttpRequestHead() = HttpRequestHead(
+    fun toHead() = HttpRequestHead(
         method = method,
         uri = uri,
         headers = headers,

@@ -6,21 +6,45 @@ import com.coditory.kttp.HttpRequestMethod
 interface HttpRoute {
     fun routing(path: String, config: HttpRoute.() -> Unit)
     fun filter(filter: HttpFilter)
-    fun handler(handler: HttpMatchingHandler)
+    fun handler(handler: HttpHandler)
 
-    fun get(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandler) {
-        handler(SimpleHttpMatchingHandler(HttpRequestMethod.GET, PathPattern(path), consumes, produces, action))
+    fun get(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandlerAction) {
+        val matcher = HttpRequestMatcher.from(
+            method = HttpRequestMethod.GET,
+            pathPattern = path,
+            consumes = consumes,
+            produces = produces,
+        )
+        handler(HttpHandler.matching(matcher, action))
     }
 
-    fun post(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandler) {
-        handler(SimpleHttpMatchingHandler(HttpRequestMethod.POST, PathPattern(path), consumes, produces, action))
+    fun post(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandlerAction) {
+        val matcher = HttpRequestMatcher.from(
+            method = HttpRequestMethod.POST,
+            pathPattern = path,
+            consumes = consumes,
+            produces = produces,
+        )
+        handler(HttpHandler.matching(matcher, action))
     }
 
-    fun put(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandler) {
-        handler(SimpleHttpMatchingHandler(HttpRequestMethod.PUT, PathPattern(path), consumes, produces, action))
+    fun put(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandlerAction) {
+        val matcher = HttpRequestMatcher.from(
+            method = HttpRequestMethod.PUT,
+            pathPattern = path,
+            consumes = consumes,
+            produces = produces,
+        )
+        handler(HttpHandler.matching(matcher, action))
     }
 
-    fun delete(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandler) {
-        handler(SimpleHttpMatchingHandler(HttpRequestMethod.DELETE, PathPattern(path), consumes, produces, action))
+    fun delete(path: String, produces: ContentType? = null, consumes: ContentType? = null, action: HttpHandlerAction) {
+        val matcher = HttpRequestMatcher.from(
+            method = HttpRequestMethod.DELETE,
+            pathPattern = path,
+            consumes = consumes,
+            produces = produces,
+        )
+        handler(HttpHandler.matching(matcher, action))
     }
 }

@@ -1,7 +1,7 @@
 package com.coditory.kttp.server.core
 
 import com.coditory.kttp.server.HttpFilter
-import com.coditory.kttp.server.HttpMatchingHandler
+import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpRequest
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.PathPattern
@@ -9,10 +9,10 @@ import com.coditory.kttp.server.PathPattern
 class HttpRouteNode : HttpRoute {
     private val children = mutableMapOf<String, HttpRouteNode>()
     private val genericPathChunks = mutableSetOf<String>()
-    private val handlers = mutableListOf<HttpMatchingHandler>()
+    private val handlers = mutableListOf<HttpHandler>()
     private val filters = mutableListOf<HttpFilter>()
 
-    fun getMatchingHandler(request: HttpRequest): HttpMatchingHandler? {
+    fun getMatchingHandler(request: HttpRequest): HttpHandler? {
         return handlers.find { it.matches(request) }
     }
 
@@ -55,7 +55,7 @@ class HttpRouteNode : HttpRoute {
         return child.child(chunks.drop(1))
     }
 
-    fun addHandler(handler: HttpMatchingHandler) {
+    fun addHandler(handler: HttpHandler) {
         handlers.add(handler)
     }
 
@@ -72,7 +72,7 @@ class HttpRouteNode : HttpRoute {
         filters.add(filter)
     }
 
-    override fun handler(handler: HttpMatchingHandler) {
+    override fun handler(handler: HttpHandler) {
         handlers.add(handler)
     }
 }

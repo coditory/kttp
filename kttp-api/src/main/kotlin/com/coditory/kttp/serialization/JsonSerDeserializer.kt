@@ -12,7 +12,7 @@ import kotlinx.serialization.json.io.encodeToSink
 
 class JsonSerDeserializer(
     private val json: Json,
-) : ScoredHttpSerDeserializer {
+) : HttpSerDeserializer {
     override fun serializationScore(request: HttpRequestHead): Int {
         val contentType = request.headers["Content-Type"]
         return contentType?.indexOf("/json") ?: -1

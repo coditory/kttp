@@ -1,7 +1,7 @@
 package com.coditory.kttp.server.jdk
 
 import com.coditory.kttp.ContentType
-import com.coditory.kttp.serialization.HttpSerializer
+import com.coditory.kttp.serialization.Serializer
 import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.HttpResponseSender
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import com.sun.net.httpserver.HttpExchange as JdkHttpExchange
 
 class JdkHttpResponseSender(
-    private val serializer: HttpSerializer,
+    private val serializer: Serializer,
     private val writeScope: CoroutineScope,
 ) : HttpResponseSender {
     @Suppress("UNCHECKED_CAST")
@@ -32,7 +32,7 @@ class JdkHttpResponseSender(
 
             is HttpResponse.SerializableResponse<*> -> {
                 val resp = response as HttpResponse.SerializableResponse<Any>
-                val req = exchange.request.toHttpRequestHead()
+                val req = exchange.request.toHead()
                 val body = serializer.serializeToString(resp.body, resp.serializer, req).toByteArray()
                 writeScope.launch {
                     jdkExchange.responseHeaders.add("Content-Type", ContentType.Application.Json.value)

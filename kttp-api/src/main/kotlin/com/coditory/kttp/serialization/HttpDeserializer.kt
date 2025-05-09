@@ -5,27 +5,27 @@ import kotlinx.io.Source
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 
-interface ScoredHttpDeserializer : HttpDeserializer {
+interface HttpDeserializer : Deserializer {
     fun deserializationScore(request: HttpRequestHead): Int
 
     companion object {
         fun default() = composite(listOf(JsonSerDeserializer.default(), FormUrlEncodedSerDeserializer.default()))
 
         fun composite(
-            deserializers: List<ScoredHttpDeserializer>,
-            defaultDeserializer: ScoredHttpDeserializer? = deserializers.first(),
-        ): ScoredHttpDeserializer = CompositeDeserializer(deserializers, defaultDeserializer)
+            deserializers: List<HttpDeserializer>,
+            defaultDeserializer: HttpDeserializer? = deserializers.first(),
+        ): HttpDeserializer = CompositeHttpDeserializer(deserializers, defaultDeserializer)
 
-        fun json(json: Json = Json): ScoredHttpDeserializer = JsonSerDeserializer(json)
+        fun json(json: Json = Json): HttpDeserializer = JsonSerDeserializer(json)
 
-        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat.default()): ScoredHttpDeserializer = FormUrlEncodedSerDeserializer(format)
+        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat.default()): HttpDeserializer = FormUrlEncodedSerDeserializer(format)
     }
 }
 
-private class CompositeDeserializer(
-    private val deserializers: List<ScoredHttpDeserializer>,
-    private val defaultDeserializer: ScoredHttpDeserializer? = null,
-) : ScoredHttpDeserializer {
+private class CompositeHttpDeserializer(
+    private val deserializers: List<HttpDeserializer>,
+    private val defaultDeserializer: HttpDeserializer? = null,
+) : HttpDeserializer {
     override fun deserializationScore(request: HttpRequestHead): Int {
         return deserializers
             .map { it.deserializationScore(request) }
@@ -51,7 +51,7 @@ private class CompositeDeserializer(
         return deserializer.deserialize(strategy, request, source)
     }
 
-    private fun findDeserializer(request: HttpRequestHead): ScoredHttpDeserializer {
+    private fun findDeserializer(request: HttpRequestHead): HttpDeserializer {
         return deserializers
             .map { it to it.deserializationScore(request) }
             .filter { it.second >= 0 }

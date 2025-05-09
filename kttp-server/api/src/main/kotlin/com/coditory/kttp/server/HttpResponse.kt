@@ -9,7 +9,7 @@ sealed interface HttpResponse {
     val status: HttpStatus
     val headers: HttpParams
 
-    fun toHttpResponseHead() = HttpResponseHead(
+    fun toHead() = HttpResponseHead(
         status = status,
         headers = headers,
     )

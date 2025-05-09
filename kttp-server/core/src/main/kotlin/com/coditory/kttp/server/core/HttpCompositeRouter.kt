@@ -2,11 +2,11 @@ package com.coditory.kttp.server.core
 
 import com.coditory.klog.Klog
 import com.coditory.kttp.HttpStatus
-import com.coditory.kttp.serialization.ScoredHttpSerDeserializer
+import com.coditory.kttp.serialization.HttpSerDeserializer
 import com.coditory.kttp.server.HttpChain
 import com.coditory.kttp.server.HttpErrorHandler
 import com.coditory.kttp.server.HttpExchange
-import com.coditory.kttp.server.HttpHandler
+import com.coditory.kttp.server.HttpHandlerAction
 import com.coditory.kttp.server.HttpRequest
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.HttpResponseSender
@@ -15,8 +15,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 
 @OptIn(DelicateCoroutinesApi::class)
 class HttpCompositeRouter(
-    notFoundAction: HttpHandler = NotFoundHttpHandler(),
-    private val responseSender: HttpResponseSender = DefaultHttpResponseSender(ScoredHttpSerDeserializer.default()),
+    notFoundAction: HttpHandlerAction = NotFoundHttpHandler(),
+    private val responseSender: HttpResponseSender = DefaultHttpResponseSender(HttpSerDeserializer.default()),
     private val errorHandler: HttpErrorHandler = HttpErrorHandler.Companion.default(),
 ) {
     private val log = Klog.logger(HttpCompositeRouter::class)

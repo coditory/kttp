@@ -2,13 +2,13 @@ package com.coditory.kttp.server.core
 
 import com.coditory.kttp.ContentType
 import com.coditory.kttp.HttpParams
-import com.coditory.kttp.serialization.HttpSerializer
+import com.coditory.kttp.serialization.Serializer
 import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.HttpResponseSender
 
 internal class DefaultHttpResponseSender(
-    private val serializer: HttpSerializer,
+    private val serializer: Serializer,
 ) : HttpResponseSender {
     @Suppress("UNCHECKED_CAST")
     override suspend fun sendResponse(exchange: HttpExchange, response: HttpResponse) {
@@ -28,7 +28,7 @@ internal class DefaultHttpResponseSender(
 
             is HttpResponse.SerializableResponse<*> -> {
                 val resp = response as HttpResponse.SerializableResponse<Any>
-                val req = exchange.request.toHttpRequestHead()
+                val req = exchange.request.toHead()
                 val body = serializer.serializeToString(resp.body, resp.serializer, req).toByteArray()
                 val headers = HttpParams.fromMap(
                     mapOf(

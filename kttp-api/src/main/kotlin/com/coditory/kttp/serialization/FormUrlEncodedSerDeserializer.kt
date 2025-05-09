@@ -11,7 +11,7 @@ import kotlinx.serialization.SerializationStrategy
 
 class FormUrlEncodedSerDeserializer(
     private val format: FormUrlEncodedFormat,
-) : ScoredHttpSerDeserializer {
+) : HttpSerDeserializer {
     override fun serializationScore(request: HttpRequestHead): Int {
         val contentType = request.headers["Content-Type"]
         return contentType?.indexOf("application/x-www-form-urlencoded") ?: -1
