@@ -1,31 +1,6 @@
 package com.coditory.kttp
 
-import com.coditory.quark.uri.UriComponents
-import java.net.URI
-import kotlin.collections.iterator
-import kotlin.collections.set
-
 interface HttpParams {
-    fun asMap(): Map<String, List<String>>
-
-    operator fun get(name: String): String? = getAll(name)?.firstOrNull()
-
-    fun getAll(name: String): List<String>?
-
-    operator fun contains(name: String): Boolean
-
-    fun contains(name: String, value: String): Boolean = contains(name, listOf(value))
-
-    fun contains(name: String, values: List<String>): Boolean
-
-    fun containsValue(value: String): Boolean
-
-    fun names(): Set<String> = asMap().keys
-
-    fun isEmpty(): Boolean = asMap().isEmpty()
-
-    fun entries(): Set<Map.Entry<String, List<String>>> = asMap().entries
-
     operator fun plus(other: HttpParams): HttpParams
 
     operator fun minus(other: HttpParams): HttpParams
@@ -76,6 +51,26 @@ interface HttpParams {
 
     fun without(names: Collection<String>): HttpParams
 
+    fun asMap(): Map<String, List<String>>
+
+    operator fun get(name: String): String? = getAll(name)?.firstOrNull()
+
+    fun getAll(name: String): List<String>?
+
+    operator fun contains(name: String): Boolean = getAll(name) != null
+
+    fun contains(name: String, value: String): Boolean = contains(name, listOf(value))
+
+    fun contains(name: String, values: List<String>): Boolean
+
+    fun containsValue(value: String): Boolean
+
+    fun names(): Set<String> = asMap().keys
+
+    fun isEmpty(): Boolean = asMap().isEmpty()
+
+    fun entries(): Set<Map.Entry<String, List<String>>> = asMap().entries
+
     fun forEach(body: (String, List<String>) -> Unit) {
         for ((key, value) in asMap()) body(key, value)
     }
@@ -86,61 +81,153 @@ interface HttpParams {
         }
     }
 
-    fun toHttpHeadersString(): String {
-        val builder = StringBuilder()
-        toHttpHeadersString(builder)
-        return builder.toString()
-    }
-
-    fun toHttpHeadersString(builder: StringBuilder) {
-        this.forEachEntry { key, value ->
-            builder.append(key).append(": ").append(value).append('\n')
-        }
-    }
-
     companion object {
-        fun empty(): HttpParams = MutableHttpParams.empty()
+        private val EMPTY = MutableMapHttpParams()
+        fun empty(): HttpParams = EMPTY
+        fun from(vararg values: Pair<String, String>): HttpParams = fromMap(values.toMap())
         fun fromMap(values: Map<String, String>): HttpParams = MutableHttpParams.fromMap(values)
         fun fromMultiMap(values: Map<String, List<String>>): HttpParams = MutableHttpParams.fromMultiMap(values)
-        fun parseQueryParams(uri: URI): HttpParams = MutableHttpParams.parseQueryParams(uri)
     }
 }
 
-class MutableHttpParams private constructor(
+interface MutableHttpParams : HttpParams {
+    override operator fun plus(other: HttpParams): MutableHttpParams
+
+    override operator fun minus(other: HttpParams): MutableHttpParams
+
+    override fun with(
+        other: HttpParams,
+        overrideEntries: Boolean,
+        allowDuplicates: Boolean,
+    ): MutableHttpParams
+
+    override fun with(
+        name: String,
+        value: String,
+        overrideEntry: Boolean,
+        allowDuplicates: Boolean,
+    ): MutableHttpParams
+
+    override fun with(
+        name: String,
+        values: List<String>,
+        overrideEntry: Boolean,
+        allowDuplicates: Boolean,
+    ): MutableHttpParams
+
+    override fun withMap(
+        other: Map<String, String>,
+        overrideEntries: Boolean,
+        allowDuplicates: Boolean,
+    ): MutableHttpParams
+
+    override fun withMultiMap(
+        other: Map<String, List<String>>,
+        overrideEntries: Boolean,
+        allowDuplicates: Boolean,
+    ): MutableHttpParams
+
+    override fun without(other: HttpParams): MutableHttpParams
+
+    override fun without(vararg pairs: Pair<String, String>): MutableHttpParams
+
+    override fun without(name: String, value: String): MutableHttpParams
+
+    override fun withoutMap(other: Map<String, String>): MutableHttpParams
+
+    override fun withoutMultiMap(other: Map<String, List<String>>): MutableHttpParams
+
+    override fun without(name: String): MutableHttpParams
+
+    override fun without(names: Collection<String>): MutableHttpParams
+
+    fun add(
+        other: HttpParams,
+        allowDuplicates: Boolean = false,
+    ) = addMultiMap(other.asMap(), allowDuplicates)
+
+    fun add(
+        name: String,
+        value: String,
+        allowDuplicates: Boolean = false,
+    ) = addMultiMap(mapOf(name to listOf(value)), allowDuplicates)
+
+    fun add(
+        name: String,
+        values: List<String>,
+        allowDuplicates: Boolean = false,
+    ) = addMultiMap(mapOf(name to values), allowDuplicates)
+
+    fun addMap(
+        other: Map<String, String>,
+        allowDuplicates: Boolean = false,
+    ) = addMultiMap(toMultiMap(other), allowDuplicates)
+
+    fun addMultiMap(
+        other: Map<String, List<String>>,
+        allowDuplicates: Boolean = false,
+    ): Boolean
+
+    fun set(other: HttpParams) = setMultiMap(other.asMap())
+
+    fun set(name: String, value: String?) = if (value == null) {
+        setMultiMap(mapOf(name to emptyList()))
+    } else {
+        setMultiMap(mapOf(name to listOf(value)))
+    }
+
+    fun set(name: String, values: List<String>) = setMultiMap(mapOf(name to values))
+
+    fun setMap(other: Map<String, String>) = setMultiMap(toMultiMap(other))
+
+    fun setMultiMap(other: Map<String, List<String>>): Boolean
+
+    fun remove(name: String): Boolean = remove(setOf(name))
+
+    fun remove(names: Collection<String>): Boolean
+
+    fun remove(other: HttpParams): Boolean = removeMultiMap(other.asMap())
+
+    fun remove(name: String, value: String) = removeMultiMap(mapOf(name to listOf(value)))
+
+    fun remove(name: String, values: List<String>) = removeMultiMap(mapOf(name to values))
+
+    fun removeMap(other: Map<String, String>) = removeMultiMap(toMultiMap(other))
+
+    fun removeMultiMap(other: Map<String, List<String>>): Boolean
+
+    companion object {
+        fun empty(): MutableHttpParams = MutableMapHttpParams()
+        fun from(vararg values: Pair<String, String>): MutableHttpParams = fromMap(values.toMap())
+        fun fromMap(values: Map<String, String>): MutableHttpParams = empty().withMap(values)
+        fun fromMultiMap(values: Map<String, List<String>>): MutableHttpParams = empty().withMultiMap(values)
+    }
+}
+
+private class MutableMapHttpParams private constructor(
     private val values: MutableMap<String, List<String>> = mutableMapOf(),
     private val lowercaseNames: Boolean = true,
     private val ignoreValueCase: Boolean = false,
     private val lowercaseValues: Boolean = false,
-) : HttpParams {
-    fun copy(
-        lowercaseNames: Boolean = this.lowercaseNames,
-        ignoreValueCase: Boolean = this.ignoreValueCase,
-        lowercaseValues: Boolean = this.lowercaseValues,
-    ): MutableHttpParams {
-        if (lowercaseNames != this.lowercaseNames || lowercaseValues != this.lowercaseValues) {
-            val params = MutableHttpParams(
-                lowercaseNames = lowercaseNames,
-                ignoreValueCase = ignoreValueCase,
-                lowercaseValues = lowercaseValues,
-            )
-            params.addMultiMap(values)
-            return params
-        }
-        return MutableHttpParams(
-            values = values,
-            lowercaseNames = lowercaseNames,
-            ignoreValueCase = ignoreValueCase,
-            lowercaseValues = lowercaseValues,
-        )
-    }
+) : MutableHttpParams {
+    constructor(
+        lowercaseNames: Boolean = true,
+        ignoreValueCase: Boolean = false,
+        lowercaseValues: Boolean = false,
+    ) : this(
+        values = mutableMapOf(),
+        lowercaseNames = lowercaseNames,
+        ignoreValueCase = ignoreValueCase,
+        lowercaseValues = lowercaseValues,
+    )
 
     private fun copy(
         values: MutableMap<String, List<String>> = this.values,
         lowercaseNames: Boolean = this.lowercaseNames,
         ignoreValueCase: Boolean = this.ignoreValueCase,
         lowercaseValues: Boolean = this.lowercaseValues,
-    ): MutableHttpParams {
-        return MutableHttpParams(
+    ): MutableMapHttpParams {
+        return MutableMapHttpParams(
             values = values,
             lowercaseNames = lowercaseNames,
             ignoreValueCase = ignoreValueCase,
@@ -176,9 +263,9 @@ class MutableHttpParams private constructor(
         }
     }
 
-    override operator fun plus(other: HttpParams): MutableHttpParams = with(other)
+    override operator fun plus(other: HttpParams): MutableMapHttpParams = with(other)
 
-    override operator fun minus(other: HttpParams): MutableHttpParams = without(other)
+    override operator fun minus(other: HttpParams): MutableMapHttpParams = without(other)
 
     override fun with(
         other: HttpParams,
@@ -204,60 +291,53 @@ class MutableHttpParams private constructor(
         other: Map<String, String>,
         overrideEntries: Boolean,
         allowDuplicates: Boolean,
-    ): MutableHttpParams = withMultiMap(toMultiMap(other), overrideEntries, allowDuplicates)
+    ) = withMultiMap(toMultiMap(other), overrideEntries, allowDuplicates)
 
     override fun withMultiMap(
         other: Map<String, List<String>>,
         overrideEntries: Boolean,
         allowDuplicates: Boolean,
-    ): MutableHttpParams {
+    ): MutableMapHttpParams {
         if (other.isEmpty()) return this
         val merged = mutableMapOf<String, List<String>>()
         merged.putAll(this.values)
         val copy = copy(merged)
-        val added = copy.addMultiMap(other, overrideEntries, allowDuplicates)
+        val added = if (overrideEntries) {
+            copy.setMultiMap(other)
+        } else {
+            copy.addMultiMap(other, allowDuplicates)
+        }
         return if (added) copy else this
     }
 
-    fun add(
+    override fun add(
         other: HttpParams,
-        overrideEntries: Boolean = false,
-        allowDuplicates: Boolean = false,
-    ) = addMultiMap(other.asMap(), overrideEntries, allowDuplicates)
+        allowDuplicates: Boolean,
+    ) = addMultiMap(other.asMap(), allowDuplicates)
 
-    fun add(
+    override fun add(
         name: String,
         value: String,
-        overrideEntries: Boolean = false,
-        allowDuplicates: Boolean = false,
-    ) = addMultiMap(mapOf(name to listOf(value)), overrideEntries, allowDuplicates)
+        allowDuplicates: Boolean,
+    ) = addMultiMap(mapOf(name to listOf(value)), allowDuplicates)
 
-    fun add(
+    override fun add(
         name: String,
         values: List<String>,
-        overrideEntries: Boolean = false,
-        allowDuplicates: Boolean = false,
-    ) = addMultiMap(mapOf(name to values), overrideEntries, allowDuplicates)
+        allowDuplicates: Boolean,
+    ) = addMultiMap(mapOf(name to values), allowDuplicates)
 
-    fun addMap(
+    override fun addMap(
         other: Map<String, String>,
-        overrideEntries: Boolean = false,
-        allowDuplicates: Boolean = false,
-    ) = addMultiMap(toMultiMap(other), overrideEntries, allowDuplicates)
+        allowDuplicates: Boolean,
+    ) = addMultiMap(toMultiMap(other), allowDuplicates)
 
-    fun addMultiMap(
+    override fun addMultiMap(
         other: Map<String, List<String>>,
-        overrideEntries: Boolean = false,
-        allowDuplicates: Boolean = false,
+        allowDuplicates: Boolean,
     ): Boolean {
         if (other.isEmpty()) return false
         val merged = this.values
-        if (overrideEntries) {
-            other.forEach { name, values ->
-                merged.put(normalizeName(name), normalizeValues(values))
-            }
-            return true
-        }
         var added = false
         other.forEach { key, values -> added = addEntry(merged, key, values, allowDuplicates) || added }
         return added
@@ -288,6 +368,29 @@ class MutableHttpParams private constructor(
         return true
     }
 
+    override fun set(other: HttpParams) = setMultiMap(other.asMap())
+
+    override fun set(name: String, value: String?) = if (value == null) {
+        setMultiMap(mapOf(name to emptyList()))
+    } else {
+        setMultiMap(mapOf(name to listOf(value)))
+    }
+
+    override fun set(name: String, values: List<String>) = setMultiMap(mapOf(name to values))
+
+    override fun setMap(other: Map<String, String>) = setMultiMap(toMultiMap(other))
+
+    override fun setMultiMap(other: Map<String, List<String>>): Boolean {
+        other.forEach { name, values ->
+            if (values.isEmpty()) {
+                this.values.remove(normalizeName(name))
+            } else {
+                this.values.put(normalizeName(name), normalizeValues(values))
+            }
+        }
+        return true
+    }
+
     override fun without(other: HttpParams) = withMultiMap(other.asMap())
 
     override fun without(vararg pairs: Pair<String, String>) = withoutMultiMap(pairs.groupBy({ it.first }, { it.second }))
@@ -296,7 +399,7 @@ class MutableHttpParams private constructor(
 
     override fun withoutMap(other: Map<String, String>) = withoutMultiMap(toMultiMap(other))
 
-    override fun withoutMultiMap(other: Map<String, List<String>>): MutableHttpParams {
+    override fun withoutMultiMap(other: Map<String, List<String>>): MutableMapHttpParams {
         if (other.isEmpty()) return this
         val merged = mutableMapOf<String, List<String>>()
         merged.putAll(values)
@@ -305,7 +408,7 @@ class MutableHttpParams private constructor(
         return if (removed) copy else this
     }
 
-    override fun without(names: Collection<String>): MutableHttpParams {
+    override fun without(names: Collection<String>): MutableMapHttpParams {
         if (names.isEmpty()) return this
         val merged = mutableMapOf<String, List<String>>()
         merged.putAll(values)
@@ -316,7 +419,7 @@ class MutableHttpParams private constructor(
         return if (removed) copy(merged) else this
     }
 
-    override fun without(name: String): MutableHttpParams {
+    override fun without(name: String): MutableMapHttpParams {
         val normalizedName = normalizeName(name)
         if (!values.contains(normalizedName)) return this
         val merged = mutableMapOf<String, List<String>>()
@@ -325,26 +428,26 @@ class MutableHttpParams private constructor(
         return copy(merged)
     }
 
-    fun remove(name: String): Boolean {
+    override fun remove(name: String): Boolean {
         val normalizedName = normalizeName(name)
         return this.values.remove(normalizedName) != null
     }
 
-    fun remove(names: Collection<String>): Boolean {
+    override fun remove(names: Collection<String>): Boolean {
         var removed = false
         names.forEach { removed = remove(it) || removed }
         return removed
     }
 
-    fun remove(other: HttpParams): Boolean = removeMultiMap(other.asMap())
+    override fun remove(other: HttpParams): Boolean = removeMultiMap(other.asMap())
 
-    fun remove(name: String, value: String) = removeMultiMap(mapOf(name to listOf(value)))
+    override fun remove(name: String, value: String) = removeMultiMap(mapOf(name to listOf(value)))
 
-    fun remove(name: String, values: List<String>) = removeMultiMap(mapOf(name to values))
+    override fun remove(name: String, values: List<String>) = removeMultiMap(mapOf(name to values))
 
-    fun removeMap(other: Map<String, String>) = removeMultiMap(toMultiMap(other))
+    override fun removeMap(other: Map<String, String>) = removeMultiMap(toMultiMap(other))
 
-    fun removeMultiMap(other: Map<String, List<String>>): Boolean {
+    override fun removeMultiMap(other: Map<String, List<String>>): Boolean {
         if (other.isEmpty()) return false
         val merged = this.values
         var removed = false
@@ -375,12 +478,6 @@ class MutableHttpParams private constructor(
         }
     }
 
-    private fun toMultiMap(other: Map<String, String>): Map<String, List<String>> {
-        return other
-            .map { it.key to listOf(it.value) }
-            .toMap()
-    }
-
     private fun normalizeValues(values: List<String>): List<String> {
         return values.map(this::normalizeValue)
     }
@@ -398,43 +495,16 @@ class MutableHttpParams private constructor(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is MutableHttpParams) return false
-        return values == other.values
+        return values == other.asMap()
     }
 
     override fun hashCode(): Int {
         return values.hashCode()
     }
+}
 
-    companion object {
-        private val EMPTY = MutableHttpParams()
-
-        fun empty(): MutableHttpParams = EMPTY
-        fun fromMap(values: Map<String, String>): MutableHttpParams = EMPTY.withMap(values)
-        fun fromMultiMap(values: Map<String, List<String>>): MutableHttpParams = EMPTY.withMultiMap(values)
-
-        fun parseQueryParams(uri: URI): MutableHttpParams = fromMultiMap(
-            UriComponents.from(uri).queryMultiParams,
-        )
-
-        fun parseHeaderParameters(header: String): MutableHttpParams {
-            val idx = header.indexOf(";")
-            if (idx < 0) return empty()
-            val paramsChunk = header.substring(idx, header.length).trim()
-            if (paramsChunk.isEmpty()) return empty()
-            val params = paramsChunk.split(";")
-                .map {
-                    val chunks = it.split("=")
-                    val key = chunks[0].trim()
-                    val value = chunks[1].trim()
-                    if (value.startsWith("\"") && value.endsWith("\"")) {
-                        key to value.substring(1, value.length - 1)
-                    } else {
-                        key to value
-                    }
-                }
-                .filter { it.first.isNotBlank() && it.second.isNotBlank() }
-                .groupBy({ it.first }, { it.second })
-            return fromMultiMap(params)
-        }
-    }
+internal fun toMultiMap(other: Map<String, String>): Map<String, List<String>> {
+    return other
+        .map { it.key to listOf(it.value) }
+        .toMap()
 }

@@ -5,12 +5,16 @@ import java.net.URI
 data class HttpRequestHead(
     val method: HttpRequestMethod,
     val uri: URI,
-    val headers: HttpParams = HttpParams.empty(),
+    val version: HttpVersion = HttpVersion.HTTP_2_0,
+    val headers: HttpHeaders = HttpHeaders.empty(),
 ) {
-    fun toHttpString(): String {
-        val builder = StringBuilder()
-        builder.append(method.toString()).append(" ").append(uri.toString())
-        headers.toHttpHeadersString()
-        return builder.toString()
+    fun toHttpString(builder: Appendable) {
+        method.toHttpString(builder)
+        builder.append(" ")
+        builder.append(uri.toString())
+        builder.append(" ")
+        version.toHttpString(builder)
+        builder.append("\r\n")
+        headers.toHttpString(builder)
     }
 }

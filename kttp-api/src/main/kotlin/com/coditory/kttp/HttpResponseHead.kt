@@ -1,21 +1,12 @@
 package com.coditory.kttp
 
-import kotlinx.io.Sink
-import kotlinx.io.writeString
-
 data class HttpResponseHead(
     val status: HttpStatus,
-    val headers: HttpParams = HttpParams.empty(),
-) {
-    fun toHttpString(sink: Sink) {
-        sink.writeInt(status.code)
-        sink.writeString("\n")
-    }
-
-    fun toHttpString(): String {
-        val builder = StringBuilder(status.toHttpString())
-        headers.toHttpHeadersString()
-        return builder.toString()
+    val headers: HttpHeaders = HttpHeaders.empty(),
+) : HttpSerializable {
+    override fun toHttpString(builder: Appendable) {
+        builder.append(status.toHttpString())
+        headers.toHttpString(builder)
     }
 
     companion object {

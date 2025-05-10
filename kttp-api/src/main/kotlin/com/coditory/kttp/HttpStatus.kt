@@ -1,10 +1,16 @@
 package com.coditory.kttp
 
+import java.lang.Appendable
+
 data class HttpStatus(
     val code: Int,
     val description: String,
-) : Comparable<HttpStatus> {
-    fun toHttpString(): String = "$code $description"
+) : Comparable<HttpStatus>, HttpSerializable {
+    private val httpEntry = "$code $description"
+    override fun toString() = httpEntry
+    override fun toHttpString(builder: Appendable) {
+        builder.append(httpEntry)
+    }
 
     override fun equals(other: Any?): Boolean = other is HttpStatus && other.code == code
 

@@ -6,9 +6,12 @@ import kotlin.collections.iterator
 class ContentType private constructor(
     val contentType: String,
     val contentSubtype: String,
-    val parameters: HttpParams = HttpParams.empty(),
+    val parameters: HttpHeaderParams = HttpHeaderParams.empty(),
 ) {
-    val value by lazy { "$contentType/$contentSubtype" }
+    val value by lazy { "$contentType/$contentSubtype" + parameters.toHttpString() }
+
+    override fun toString() = toHttpString()
+    fun toHttpString(): String = value
 
     fun withParameter(name: String, value: String): ContentType {
         if (parameters.contains(name, value)) return this
@@ -111,28 +114,29 @@ class ContentType private constructor(
     }
 
     companion object {
-//        fun parse(value: String): ContentType {
-//            if (value.isBlank()) return Any
-//            return parse(value) { parts, parameters ->
-//                val slash = parts.indexOf('/')
-//                if (slash == -1) {
-//                    if (parts.trim() == "*") return Any
-//                    throw BadContentTypeFormatException(value)
-//                }
-//                val type = parts.substring(0, slash).trim()
-//                if (type.isEmpty()) {
-//                    throw BadContentTypeFormatException(value)
-//                }
-//                val subtype = parts.substring(slash + 1).trim()
-//                if (type.contains(' ') || subtype.contains(' ')) {
-//                    throw BadContentTypeFormatException(value)
-//                }
-//                if (subtype.isEmpty() || subtype.contains('/')) {
-//                    throw BadContentTypeFormatException(value)
-//                }
-//                ContentType(type, subtype, parameters)
-//            }
-//        }
+        fun parse(value: String): ContentType? {
+            val header = HttpHeaderValue.parse(value) ?: return null
+            if (header.items.size != 1) throw BadContentTypeFormatException(value)
+            val item = header.items.first()
+            val parts = item.value
+            val slash = parts.indexOf('/')
+            if (slash == -1) {
+                if (parts.trim() == "*") return Any
+                throw BadContentTypeFormatException(value)
+            }
+            val type = parts.substring(0, slash).trim()
+            if (type.isEmpty()) {
+                throw BadContentTypeFormatException(value)
+            }
+            val subtype = parts.substring(slash + 1).trim()
+            if (type.contains(' ') || subtype.contains(' ')) {
+                throw BadContentTypeFormatException(value)
+            }
+            if (subtype.isEmpty() || subtype.contains('/')) {
+                throw BadContentTypeFormatException(value)
+            }
+            return ContentType(type, subtype, item.params)
+        }
 
         val Any: ContentType = ContentType("*", "*")
     }

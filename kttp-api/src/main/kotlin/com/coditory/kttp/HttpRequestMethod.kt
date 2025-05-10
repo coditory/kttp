@@ -1,6 +1,6 @@
 package com.coditory.kttp
 
-enum class HttpRequestMethod {
+enum class HttpRequestMethod : HttpSerializable {
     GET,
     POST,
     PUT,
@@ -9,6 +9,10 @@ enum class HttpRequestMethod {
     OPTIONS,
     OTHER,
     ;
+
+    override fun toHttpString(builder: Appendable) {
+        builder.append(this.name)
+    }
 
     companion object {
         fun parse(text: String): HttpRequestMethod {
