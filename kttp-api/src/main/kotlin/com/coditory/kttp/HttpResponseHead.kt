@@ -1,5 +1,7 @@
 package com.coditory.kttp
 
+import com.coditory.kttp.headers.HttpHeaders
+
 data class HttpResponseHead(
     val status: HttpStatus,
     val headers: HttpHeaders = HttpHeaders.empty(),

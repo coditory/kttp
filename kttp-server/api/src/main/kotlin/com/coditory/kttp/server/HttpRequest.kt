@@ -1,8 +1,8 @@
 package com.coditory.kttp.server
 
-import com.coditory.kttp.HttpParams
 import com.coditory.kttp.HttpRequestHead
 import com.coditory.kttp.HttpRequestMethod
+import com.coditory.kttp.headers.HttpHeaders
 import com.coditory.kttp.serialization.Deserializer
 import kotlinx.io.Source
 import kotlinx.io.readString
@@ -12,7 +12,7 @@ import java.net.URI
 class HttpRequest(
     val method: HttpRequestMethod,
     val uri: URI,
-    val headers: HttpParams = HttpParams.empty(),
+    val headers: HttpHeaders = HttpHeaders.empty(),
     private val deserializer: Deserializer,
     val source: Source,
 ) {

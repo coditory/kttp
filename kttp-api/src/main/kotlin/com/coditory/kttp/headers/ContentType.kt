@@ -1,12 +1,11 @@
-package com.coditory.kttp
+package com.coditory.kttp.headers
 
 import java.nio.charset.Charset
-import kotlin.collections.iterator
 
 class ContentType private constructor(
     val contentType: String,
     val contentSubtype: String,
-    val parameters: HttpHeaderParams = HttpHeaderParams.empty(),
+    val parameters: HttpHeaderParams = HttpHeaderParams.Companion.empty(),
 ) {
     val value by lazy { "$contentType/$contentSubtype" + parameters.toHttpString() }
 
@@ -48,7 +47,7 @@ class ContentType private constructor(
      * ContentType("a", "b").match(ContentType("a", "*")) === true
      * ```
      */
-    fun match(pattern: ContentType): Boolean {
+    fun matches(pattern: ContentType): Boolean {
         if (pattern.contentType != "*" && !pattern.contentType.equals(contentType, ignoreCase = true)) {
             return false
         }
@@ -118,22 +117,26 @@ class ContentType private constructor(
             val header = HttpHeaderValue.parse(value) ?: return null
             if (header.items.size != 1) throw BadContentTypeFormatException(value)
             val item = header.items.first()
+            return parse(item)
+        }
+
+        fun parse(item: HttpHeaderValueItem): ContentType? {
             val parts = item.value
             val slash = parts.indexOf('/')
             if (slash == -1) {
                 if (parts.trim() == "*") return Any
-                throw BadContentTypeFormatException(value)
+                throw BadContentTypeFormatException(item.toHttpString())
             }
             val type = parts.substring(0, slash).trim()
             if (type.isEmpty()) {
-                throw BadContentTypeFormatException(value)
+                throw BadContentTypeFormatException(item.toHttpString())
             }
             val subtype = parts.substring(slash + 1).trim()
             if (type.contains(' ') || subtype.contains(' ')) {
-                throw BadContentTypeFormatException(value)
+                throw BadContentTypeFormatException(item.toHttpString())
             }
             if (subtype.isEmpty() || subtype.contains('/')) {
-                throw BadContentTypeFormatException(value)
+                throw BadContentTypeFormatException(item.toHttpString())
             }
             return ContentType(type, subtype, item.params)
         }
@@ -169,7 +172,7 @@ class ContentType private constructor(
         val ProblemXml: ContentType = ContentType(TYPE, "problem+xml")
 
         operator fun contains(contentType: CharSequence): Boolean = contentType.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object Audio {
@@ -180,7 +183,7 @@ class ContentType private constructor(
         val OGG: ContentType = ContentType(TYPE, "ogg")
 
         operator fun contains(contentType: CharSequence): Boolean = contentType.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object Image {
@@ -193,7 +196,7 @@ class ContentType private constructor(
         val XIcon: ContentType = ContentType(TYPE, "x-icon")
 
         operator fun contains(contentSubtype: String): Boolean = contentSubtype.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object Message {
@@ -202,7 +205,7 @@ class ContentType private constructor(
         val Http: ContentType = ContentType(TYPE, "http")
 
         operator fun contains(contentSubtype: String): Boolean = contentSubtype.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object MultiPart {
@@ -217,7 +220,7 @@ class ContentType private constructor(
         val ByteRanges: ContentType = ContentType(TYPE, "byteranges")
 
         operator fun contains(contentType: CharSequence): Boolean = contentType.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object Text {
@@ -233,7 +236,7 @@ class ContentType private constructor(
         val EventStream: ContentType = ContentType(TYPE, "event-stream")
 
         operator fun contains(contentType: CharSequence): Boolean = contentType.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object Video {
@@ -245,7 +248,7 @@ class ContentType private constructor(
         val QuickTime: ContentType = ContentType(TYPE, "quicktime")
 
         operator fun contains(contentType: CharSequence): Boolean = contentType.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 
     object Font {
@@ -259,7 +262,7 @@ class ContentType private constructor(
         val Woff2: ContentType = ContentType(TYPE, "woff2")
 
         operator fun contains(contentType: CharSequence): Boolean = contentType.startsWith("$TYPE/", ignoreCase = true)
-        operator fun contains(contentType: ContentType): Boolean = contentType.match(Any)
+        operator fun contains(contentType: ContentType): Boolean = contentType.matches(Any)
     }
 }
 

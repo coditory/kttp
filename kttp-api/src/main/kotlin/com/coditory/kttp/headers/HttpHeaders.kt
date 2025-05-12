@@ -1,7 +1,13 @@
-package com.coditory.kttp
+package com.coditory.kttp.headers
+
+import com.coditory.kttp.HttpParams
+import com.coditory.kttp.HttpSerializable
+import com.coditory.kttp.MutableHttpParams
+import com.coditory.kttp.toMultiMap
 
 interface HttpHeaders : HttpParams, HttpSerializable {
     fun contentType(): ContentType?
+    fun accept(): ContentType?
 
     override fun toHttpString(builder: Appendable) {
         forEachEntry { key, value ->
@@ -189,20 +195,47 @@ interface HttpHeaders : HttpParams, HttpSerializable {
 class MutableHttpHeaders private constructor(
     private val params: MutableHttpParams,
 ) : MutableHttpParams, HttpHeaders {
-    constructor() : this(MutableHttpParams.empty())
+    constructor() : this(MutableHttpParams.Companion.empty())
 
-    private var contentType: ContentType? = null
+    private var cache = mutableMapOf<String, Any?>()
+
+    private fun getParsed(key: String, parse: (v: String) -> Any?): Any? {
+        return cache.getOrPut(key) {
+            val value = get(HttpHeaders.ContentType)
+            if (value == null) {
+                null
+            } else {
+                parse(value) as Any
+            }
+        }
+    }
+
+    private fun setParsed(key: String, value: String?) {
+        if (value == null) {
+            remove(key)
+            cache.remove(key)
+        } else {
+            set(key, value)
+            cache.put(key, value)
+        }
+    }
 
     override fun contentType(): ContentType? {
-        if (contentType == null) {
-            contentType = get(HttpHeaders.ContentType)?.let(ContentType::parse)
-        }
-        return contentType
+        return getParsed(HttpHeaders.ContentType, ContentType::parse)
+            ?.let { it as ContentType }
     }
 
     fun contentType(value: ContentType?) {
-        contentType = value
-        set(HttpHeaders.ContentType, value?.value)
+        setParsed(HttpHeaders.ContentType, value?.value)
+    }
+
+    override fun accept(): ContentType? {
+        return getParsed(HttpHeaders.Accept, ContentType::parse)
+            ?.let { it as ContentType }
+    }
+
+    fun accept(value: ContentType?) {
+        setParsed(HttpHeaders.Accept, value?.value)
     }
 
     override fun asMap() = params.asMap()

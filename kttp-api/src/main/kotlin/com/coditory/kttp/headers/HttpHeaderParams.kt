@@ -1,6 +1,10 @@
-package com.coditory.kttp
+package com.coditory.kttp.headers
 
-import com.coditory.kttp.MutableHttpHeaderParams.Companion.headerParamValueToHttpString
+import com.coditory.kttp.HttpParams
+import com.coditory.kttp.HttpSerializable
+import com.coditory.kttp.MutableHttpParams
+import com.coditory.kttp.headers.MutableHttpHeaderParams.Companion.headerParamValueToHttpString
+import com.coditory.kttp.toMultiMap
 
 interface HttpHeaderParams : HttpParams, HttpSerializable {
     override fun toHttpString(builder: Appendable) {
@@ -76,7 +80,7 @@ interface HttpHeaderParams : HttpParams, HttpSerializable {
 class MutableHttpHeaderParams private constructor(
     private val params: MutableHttpParams,
 ) : MutableHttpParams, HttpHeaderParams {
-    constructor() : this(MutableHttpParams.empty())
+    constructor() : this(MutableHttpParams.Companion.empty())
 
     override fun asMap() = params.asMap()
 

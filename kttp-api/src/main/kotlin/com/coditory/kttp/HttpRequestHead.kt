@@ -1,5 +1,6 @@
 package com.coditory.kttp
 
+import com.coditory.kttp.headers.HttpHeaders
 import java.net.URI
 
 data class HttpRequestHead(

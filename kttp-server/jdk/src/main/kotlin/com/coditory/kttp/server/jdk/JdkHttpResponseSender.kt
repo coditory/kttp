@@ -1,6 +1,6 @@
 package com.coditory.kttp.server.jdk
 
-import com.coditory.kttp.ContentType
+import com.coditory.kttp.headers.ContentType
 import com.coditory.kttp.serialization.Serializer
 import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpResponse

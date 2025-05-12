@@ -1,11 +1,21 @@
 package com.coditory.kttp.server
 
-import com.coditory.kttp.ContentType
 import com.coditory.kttp.HttpRequestHead
 import com.coditory.kttp.HttpRequestMethod
+import com.coditory.kttp.headers.ContentType
 
-fun interface HttpRequestMatcher {
-    fun matches(request: HttpRequestHead): Boolean
+interface HttpRequestMatcher {
+    fun matches(request: HttpRequestHead): Boolean = matchesPath(request) &&
+        matchesMethod(request) &&
+        matchesLanguage(request) &&
+        matchesAccept(request) &&
+        matchesContentType(request)
+
+    fun matchesPath(request: HttpRequestHead): Boolean
+    fun matchesMethod(request: HttpRequestHead): Boolean
+    fun matchesAccept(request: HttpRequestHead): Boolean
+    fun matchesContentType(request: HttpRequestHead): Boolean
+    fun matchesLanguage(request: HttpRequestHead): Boolean
 
     companion object {
         fun from(
@@ -58,5 +68,25 @@ private data class StaticHttpRequestMatcher(
         if (consumes == null && produces == null) return true
         // TODO: Negotiate content with Content-Type and Accept
         return true
+    }
+
+    override fun matchesPath(request: HttpRequestHead): Boolean {
+        return pathPattern != null && !pathPattern.matches(request.uri.path)
+    }
+
+    override fun matchesMethod(request: HttpRequestHead): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun matchesAccept(request: HttpRequestHead): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun matchesContentType(request: HttpRequestHead): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun matchesLanguage(request: HttpRequestHead): Boolean {
+        TODO("Not yet implemented")
     }
 }

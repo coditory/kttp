@@ -1,5 +1,8 @@
 package com.coditory.kttp
 
+import com.coditory.kttp.headers.HttpHeaderParams
+import com.coditory.kttp.headers.HttpHeaderValue
+import com.coditory.kttp.headers.HttpHeaderValueItem
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.tuple
 import io.kotest.matchers.shouldBe

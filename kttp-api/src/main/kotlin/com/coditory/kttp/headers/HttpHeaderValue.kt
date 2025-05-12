@@ -1,7 +1,9 @@
-package com.coditory.kttp
+package com.coditory.kttp.headers
 
-data class HttpHeaderValue(
-    val items: List<HttpHeaderValueItem>,
+import com.coditory.kttp.HttpSerializable
+
+class HttpHeaderValue(
+    items: List<HttpHeaderValueItem>,
 ) : HttpSerializable {
     constructor(
         value: CharSequence,
@@ -19,6 +21,27 @@ data class HttpHeaderValue(
         }
     }
 
+    val items = items.sorted()
+
+    fun with(other: HttpHeaderValue): HttpHeaderValue {
+        return HttpHeaderValue(items + other.items)
+    }
+
+    override fun toString(): String {
+        return this::class.simpleName + items.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as HttpHeaderValue
+        return items == other.items
+    }
+
+    override fun hashCode(): Int {
+        return items.hashCode()
+    }
+
     companion object {
         fun parse(header: CharSequence) = HttpHeaderValueParser.parse(header)
     }
@@ -27,10 +50,18 @@ data class HttpHeaderValue(
 data class HttpHeaderValueItem(
     val value: CharSequence,
     val params: HttpHeaderParams = HttpHeaderParams.empty(),
-) : HttpSerializable {
+) : HttpSerializable, Comparable<HttpHeaderValueItem> {
     override fun toHttpString(builder: Appendable) {
         headerValueToHttpString(builder, value)
         params.toHttpString(builder)
+    }
+
+    fun quality(): Float {
+        return params["q"]?.toFloatOrNull() ?: 1.0f
+    }
+
+    override fun compareTo(other: HttpHeaderValueItem): Int {
+        return this.quality().compareTo(other.quality())
     }
 
     companion object {
