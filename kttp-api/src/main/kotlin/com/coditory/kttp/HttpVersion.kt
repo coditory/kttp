@@ -19,7 +19,7 @@ data class HttpVersion(
         val SPDY_3: HttpVersion = HttpVersion("SPDY", 3, 0)
         val QUIC: HttpVersion = HttpVersion("QUIC", 1, 0)
 
-        fun fromValue(name: String, major: Int, minor: Int): HttpVersion = when {
+        fun from(name: String, major: Int, minor: Int): HttpVersion = when {
             name == "HTTP" && major == 1 && minor == 0 -> HTTP_1_0
             name == "HTTP" && major == 1 && minor == 1 -> HTTP_1_1
             name == "HTTP" && major == 2 && minor == 0 -> HTTP_2_0
@@ -29,13 +29,23 @@ data class HttpVersion(
         /**
          * Format: protocol/major.minor
          */
-        fun parse(value: CharSequence): HttpVersion {
+        fun from(value: CharSequence): HttpVersion {
             val (protocol, major, minor) = value.split("/", ".").also {
                 require(it.size == 3) {
                     "Failed to parse HttpProtocolVersion. Expected format: protocol/major.minor, but actual: $value"
                 }
             }
-            return fromValue(protocol, major.toInt(), minor.toInt())
+            return from(protocol, major.toInt(), minor.toInt())
+        }
+
+        /**
+         * Format: protocol/major.minor
+         */
+        fun fromOrNull(value: CharSequence): HttpVersion? {
+            val (protocol, major, minor) = value.split("/", ".").also {
+                if (it.size != 3) return null
+            }
+            return from(protocol, major.toInt(), minor.toInt())
         }
     }
 }

@@ -238,7 +238,7 @@ class MutableHttpHeaders private constructor(
         setParsed(HttpHeaders.Accept, value?.value)
     }
 
-    override fun asMap() = params.asMap()
+    override fun toMap() = params.toMap()
 
     override fun getAll(name: String) = params.getAll(name)
 
@@ -246,15 +246,15 @@ class MutableHttpHeaders private constructor(
 
     override fun containsValue(value: String) = params.containsValue(value)
 
-    override fun plus(other: HttpParams): MutableHttpHeaders = withMultiMap(other.asMap())
+    override fun plus(other: HttpParams): MutableHttpHeaders = withMultiMap(other.toMap())
 
-    override fun minus(other: HttpParams): MutableHttpHeaders = withoutMultiMap(other.asMap())
+    override fun minus(other: HttpParams): MutableHttpHeaders = withoutMultiMap(other.toMap())
 
     override fun with(
         other: HttpParams,
         overrideEntries: Boolean,
         allowDuplicates: Boolean,
-    ): MutableHttpHeaders = withMultiMap(other.asMap(), overrideEntries, allowDuplicates)
+    ): MutableHttpHeaders = withMultiMap(other.toMap(), overrideEntries, allowDuplicates)
 
     override fun with(
         name: String,
@@ -285,7 +285,7 @@ class MutableHttpHeaders private constructor(
         return if (merged === params) this else MutableHttpHeaders(merged)
     }
 
-    override fun without(other: HttpParams): MutableHttpHeaders = withoutMultiMap(other.asMap())
+    override fun without(other: HttpParams): MutableHttpHeaders = withoutMultiMap(other.toMap())
 
     override fun without(vararg pairs: Pair<String, String>) = withoutMultiMap(pairs.groupBy({ it.first }, { it.second }))
 

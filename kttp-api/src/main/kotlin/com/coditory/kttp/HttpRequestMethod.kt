@@ -19,7 +19,7 @@ class HttpRequestMethod private constructor(
         val HEAD = HttpRequestMethod("HEAD")
         val OPTIONS = HttpRequestMethod("OPTIONS")
 
-        fun parse(text: String): HttpRequestMethod {
+        fun from(text: String): HttpRequestMethod {
             val uppercased = text.uppercase()
             return when (uppercased) {
                 GET.value -> GET

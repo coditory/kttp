@@ -56,12 +56,13 @@ data class HttpHeaderValueItem(
         params.toHttpString(builder)
     }
 
-    fun quality(): Float {
-        return params["q"]?.toFloatOrNull() ?: 1.0f
+    fun quality(): Float? {
+        return params["q"]?.toFloatOrNull()
     }
 
     override fun compareTo(other: HttpHeaderValueItem): Int {
-        return this.quality().compareTo(other.quality())
+        val q = this.quality() ?: 1.0f
+        return q.compareTo(other.quality() ?: 1.0f)
     }
 
     companion object {

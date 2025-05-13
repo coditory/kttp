@@ -54,7 +54,7 @@ class ContentType private constructor(
         if (pattern.contentSubtype != "*" && !pattern.contentSubtype.equals(contentSubtype, ignoreCase = true)) {
             return false
         }
-        for ((patternName, patternValues) in pattern.parameters.asMap()) {
+        for ((patternName, patternValues) in pattern.parameters.toMap()) {
             val matches = patternValues.all { patternValue ->
                 when (patternName) {
                     "*" -> {
@@ -78,10 +78,6 @@ class ContentType private constructor(
         }
         return true
     }
-
-//    fun match(pattern: String): Boolean {
-//        return match(parse(pattern))
-//    }
 
     fun withCharset(charset: Charset): ContentType = withParameter("charset", charset.name())
 

@@ -1,7 +1,5 @@
 package com.coditory.kttp
 
-import java.lang.Appendable
-
 data class HttpStatus(
     val code: Int,
     val description: String,
@@ -150,7 +148,7 @@ data class HttpStatus(
             InsufficientStorage,
         ).associateBy { it.code }
 
-        fun fromValue(code: Int): HttpStatus {
+        fun from(code: Int): HttpStatus {
             return statusCodes[code] ?: HttpStatus(code, "Unknown Status Code")
         }
     }

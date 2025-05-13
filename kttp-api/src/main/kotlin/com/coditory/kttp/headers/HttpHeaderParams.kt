@@ -82,7 +82,7 @@ class MutableHttpHeaderParams private constructor(
 ) : MutableHttpParams, HttpHeaderParams {
     constructor() : this(MutableHttpParams.Companion.empty())
 
-    override fun asMap() = params.asMap()
+    override fun toMap() = params.toMap()
 
     override fun getAll(name: String) = params.getAll(name)
 
@@ -98,7 +98,7 @@ class MutableHttpHeaderParams private constructor(
         other: HttpParams,
         overrideEntries: Boolean,
         allowDuplicates: Boolean,
-    ): MutableHttpHeaderParams = withMultiMap(other.asMap(), overrideEntries, allowDuplicates)
+    ): MutableHttpHeaderParams = withMultiMap(other.toMap(), overrideEntries, allowDuplicates)
 
     override fun with(
         name: String,
@@ -129,7 +129,7 @@ class MutableHttpHeaderParams private constructor(
         return if (merged === params) this else MutableHttpHeaderParams(merged)
     }
 
-    override fun without(other: HttpParams): MutableHttpHeaderParams = withoutMultiMap(other.asMap())
+    override fun without(other: HttpParams): MutableHttpHeaderParams = withoutMultiMap(other.toMap())
 
     override fun without(vararg pairs: Pair<String, String>) = withoutMultiMap(pairs.groupBy({ it.first }, { it.second }))
 
