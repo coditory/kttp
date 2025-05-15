@@ -12,9 +12,18 @@ class ContentType private constructor(
     override fun toString() = toHttpString()
     fun toHttpString(): String = value
 
-    fun withParameter(name: String, value: String): ContentType {
+    fun withParameter(name: String, value: String?): ContentType {
+        if (value == null) return withoutParameter(name)
         if (parameters.contains(name, value)) return this
         return ContentType(contentType, contentSubtype, parameters.with(name, value, overrideEntry = true))
+    }
+
+    fun quality(): Float? {
+        return parameters["q"]?.toFloatOrNull()
+    }
+
+    fun withQuality(quality: Float?): ContentType {
+        return if (quality() == quality) this else withoutParameter("q")
     }
 
     private fun hasParameter(name: String, value: String): Boolean {
@@ -47,13 +56,14 @@ class ContentType private constructor(
      * ContentType("a", "b").match(ContentType("a", "*")) === true
      * ```
      */
-    fun matches(pattern: ContentType): Boolean {
+    fun matches(pattern: ContentType, ignoreParams: Boolean = false): Boolean {
         if (pattern.contentType != "*" && !pattern.contentType.equals(contentType, ignoreCase = true)) {
             return false
         }
         if (pattern.contentSubtype != "*" && !pattern.contentSubtype.equals(contentSubtype, ignoreCase = true)) {
             return false
         }
+        if (ignoreParams) return true
         for ((patternName, patternValues) in pattern.parameters.toMap()) {
             val matches = patternValues.all { patternValue ->
                 when (patternName) {
@@ -82,7 +92,7 @@ class ContentType private constructor(
     fun withCharset(charset: Charset): ContentType = withParameter("charset", charset.name())
 
     fun charsetName(): String? {
-        return parameters["charset"] ?: return null
+        return parameters["charset"]
     }
 
     fun charset(): Charset? {
@@ -135,6 +145,30 @@ class ContentType private constructor(
                 throw BadContentTypeFormatException(item.toHttpString())
             }
             return ContentType(type, subtype, item.params)
+        }
+
+        fun minimize(contentTypes: Collection<ContentType>, ignoreParams: Boolean = false): Set<ContentType> {
+            val result = mutableSetOf<ContentType>()
+            val types = if (ignoreParams) {
+                contentTypes.map { it.withoutParameters() }.toList()
+            } else {
+                contentTypes.toList()
+            }
+            for (i in 0 until contentTypes.size) {
+                val ci = types[i]
+                var skip = false
+                for (j in i + 1 until contentTypes.size) {
+                    val cj = types[j]
+                    if (ci.matches(cj)) {
+                        skip = true
+                        break
+                    }
+                }
+                if (!skip) {
+                    result.add(ci)
+                }
+            }
+            return result
         }
 
         val Any: ContentType = ContentType("*", "*")

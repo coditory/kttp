@@ -1,16 +1,11 @@
 package com.coditory.kttp.server.jdk
 
-import com.coditory.klog.Klog
-import com.coditory.kttp.HttpParams
 import com.coditory.kttp.HttpRequestMethod
+import com.coditory.kttp.headers.HttpHeaders
 import com.coditory.kttp.serialization.SerDeserializer
-import com.coditory.kttp.server.HttpErrorHandler
 import com.coditory.kttp.server.HttpExchange
-import com.coditory.kttp.server.HttpHandlerAction
 import com.coditory.kttp.server.HttpRequest
-import com.coditory.kttp.server.HttpRoute
-import com.coditory.kttp.server.core.HttpCompositeRouter
-import com.coditory.kttp.server.core.NotFoundHttpHandler
+import com.coditory.kttp.server.core.HttpTreeRouter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
@@ -21,22 +16,11 @@ import com.sun.net.httpserver.HttpExchange as JdkHttpExchange
 import com.sun.net.httpserver.HttpHandler as JdkHttpHandler
 
 @OptIn(DelicateCoroutinesApi::class)
-internal class JdkHttpRouter(
+internal class JdkHttpExchangeHandler(
     private val requestScope: CoroutineScope,
-    private val responseSendingScope: CoroutineScope,
     private val serde: SerDeserializer,
-    notFoundAction: HttpHandlerAction = NotFoundHttpHandler(),
-    errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
+    private val router: HttpTreeRouter,
 ) : JdkHttpHandler {
-    private val log = Klog.logger(JdkHttpRouter::class)
-    private val router = HttpCompositeRouter(
-        notFoundAction = notFoundAction,
-        errorHandler = errorHandler,
-        responseSender = JdkHttpResponseSender(serde, responseSendingScope),
-    )
-
-    fun routing(config: HttpRoute.() -> Unit) = router.routing(config)
-
     override fun handle(jdkExchange: JdkHttpExchange) {
         requestScope.launch {
             handleAndCatch(jdkExchange)
@@ -47,17 +31,16 @@ internal class JdkHttpRouter(
         try {
             val exchange = buildExchange(jdkExchange)
             router.handle(exchange)
-        } catch (e: Throwable) {
-            log.error(e) { "Failed for exchange: ${jdkExchange.requestMethod} ${jdkExchange.requestURI}" }
+        } catch (_: Throwable) {
             jdkExchange.sendResponseHeaders(500, 0)
         }
     }
 
     private fun buildExchange(jdkExchange: JdkHttpExchange): HttpExchange {
         val request = HttpRequest(
-            method = HttpRequestMethod.valueOf(jdkExchange.requestMethod),
+            method = HttpRequestMethod.from(jdkExchange.requestMethod),
             uri = jdkExchange.requestURI,
-            headers = HttpParams.fromMultiMap(jdkExchange.requestHeaders.toMap()),
+            headers = HttpHeaders.fromMultiMap(jdkExchange.requestHeaders.toMap()),
             deserializer = serde,
             source = jdkExchange.requestBody.asSource().buffered(),
         )

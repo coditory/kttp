@@ -7,7 +7,7 @@ plugins {
 description = "Kttp Server - Internal core"
 
 dependencies {
-    api(project(":server:api"))
+    api(project(":kttp-server:api"))
     api(libs.kotlin.reflect)
     api(libs.kotlinx.serialization.json)
     api(libs.kotlinx.serialization.json.io)

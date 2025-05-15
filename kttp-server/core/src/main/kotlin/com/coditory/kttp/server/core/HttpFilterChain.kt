@@ -5,7 +5,7 @@ import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpFilter
 import com.coditory.kttp.server.HttpResponse
 
-class HttpFilterChain(
+internal class HttpFilterChain(
     private val filter: HttpFilter,
     private val chain: HttpChain,
 ) : HttpChain {

@@ -21,5 +21,5 @@ tasks.withType<Jar> {
 }
 
 dependencies {
-    implementation(project(":server:jdk"))
+    implementation(project(":kttp-server:jdk"))
 }

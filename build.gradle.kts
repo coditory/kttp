@@ -10,15 +10,15 @@ allprojects {
 }
 
 dependencies {
-    project(":api")
-    project(":server:api")
-    project(":server:core")
-    project(":server:jdk")
-    project(":server:samples")
+    project(":kttp-api")
+    project(":kttp-server:api")
+    project(":kttp-server:core")
+    project(":kttp-server:jdk")
+    project(":kttp-server:samples")
 
     // merged coverage report
-    kover(project(":api"))
-    kover(project(":server:api"))
-    kover(project(":server:core"))
-    kover(project(":server:jdk"))
+    kover(project(":kttp-api"))
+    kover(project(":kttp-server:api"))
+    kover(project(":kttp-server:core"))
+    kover(project(":kttp-server:jdk"))
 }

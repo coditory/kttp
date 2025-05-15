@@ -3,6 +3,8 @@ package com.coditory.kttp.headers
 data class Accept(
     val contentTypes: List<ContentType>,
 ) {
+    val value by lazy { contentTypes.joinToString(",") { it.value } }
+
     fun matches(contentType: ContentType): Boolean {
         return contentTypes.any { it.matches(contentType) }
     }

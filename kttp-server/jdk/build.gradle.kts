@@ -7,7 +7,8 @@ plugins {
 description = "Kttp Server - implementation with JDK HttpServer"
 
 dependencies {
-    implementation(project(":server:core"))
-    implementation(libs.kotlinx.coroutines.core)
+    api(project(":kttp-server:api"))
+    implementation(project(":kttp-server:core"))
+    api(libs.kotlinx.coroutines.core)
     implementation(libs.quark.uri)
 }

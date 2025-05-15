@@ -15,6 +15,7 @@ class HttpRequestMethod private constructor(
         val GET = HttpRequestMethod("GET")
         val POST = HttpRequestMethod("POST")
         val PUT = HttpRequestMethod("PUT")
+        val PATCH = HttpRequestMethod("PATCH")
         val DELETE = HttpRequestMethod("DELETE")
         val HEAD = HttpRequestMethod("HEAD")
         val OPTIONS = HttpRequestMethod("OPTIONS")
@@ -25,6 +26,7 @@ class HttpRequestMethod private constructor(
                 GET.value -> GET
                 POST.value -> POST
                 PUT.value -> PUT
+                PATCH.value -> PATCH
                 DELETE.value -> DELETE
                 HEAD.value -> HEAD
                 OPTIONS.value -> OPTIONS

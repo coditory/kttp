@@ -7,13 +7,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.Sink
 import kotlinx.io.writeString
+import java.util.concurrent.ConcurrentHashMap
 
 data class HttpExchange(
     val request: HttpRequest,
     val responseBody: Sink,
 ) {
-    val attributes = mutableMapOf<String, Any>()
-
+    val attributes = ConcurrentHashMap<String, Any>()
     private val mutex = Mutex()
     private var sent = false
 
