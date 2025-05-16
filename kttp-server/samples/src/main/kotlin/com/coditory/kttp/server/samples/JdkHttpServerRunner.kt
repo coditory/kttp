@@ -6,6 +6,7 @@ import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.jdk.JdkHttpServer
+import kotlinx.coroutines.runBlocking
 
 object JdkHttpServerRunner {
     @JvmStatic
@@ -45,8 +46,12 @@ object JdkHttpServerRunner {
                 }
             }
         }
-        server.start()
-        println("${server::class.simpleName} listening on http://localhost:${server.port}")
-        Thread.sleep(100_000)
+        runBlocking {
+            server.startAndWait {
+                println("${server::class.simpleName} listening on http://localhost:${server.port}")
+            }
+        }
+        server.stop()
+        println("Server stopped")
     }
 }

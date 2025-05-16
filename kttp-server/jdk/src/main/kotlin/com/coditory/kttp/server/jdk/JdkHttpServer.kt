@@ -7,11 +7,12 @@ import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.HttpRouter
 import com.coditory.kttp.server.HttpServer
-import com.coditory.kttp.server.core.HttpTreeRouter
+import com.coditory.kttp.server.core.HttpExchangeExecutor
 import com.coditory.kttp.server.core.NotFoundHttpHandler
 import com.coditory.quark.uri.Ports
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.net.InetSocketAddress
 import com.sun.net.httpserver.HttpServer as JdkHttpServer
 
@@ -24,7 +25,7 @@ class JdkHttpServer(
     notFoundHandler: HttpHandler = NotFoundHttpHandler(),
     errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
 ) : HttpServer {
-    private val router = HttpTreeRouter(
+    private val executor = HttpExchangeExecutor(
         notFoundHandler = notFoundHandler,
         errorHandler = errorHandler,
         responseSender = JdkHttpResponseSender(serde, responseWriteScope),
@@ -32,7 +33,7 @@ class JdkHttpServer(
     private val exchangeHandler = JdkHttpExchangeHandler(
         requestScope = requestScope,
         serde = serde,
-        router = router,
+        executor = executor,
     )
     private val server = JdkHttpServer.create(InetSocketAddress(port), backlog).apply {
         executor = null // creates a default executor that runs on callers thread
@@ -40,16 +41,20 @@ class JdkHttpServer(
     }
 
     override fun start() {
+        executor.start()
         server.start()
     }
 
     override fun stop() {
-        server.stop(5)
+        runBlocking {
+            executor.stopAndWait()
+        }
+        server.stop(0)
     }
 
-    override fun router(): HttpRouter = router
+    override fun router(): HttpRouter = executor
 
     override fun routing(config: HttpRoute.() -> Unit) {
-        router.routing(config = config)
+        executor.routing(config = config)
     }
 }

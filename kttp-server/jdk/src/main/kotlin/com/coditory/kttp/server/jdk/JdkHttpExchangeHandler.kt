@@ -5,7 +5,7 @@ import com.coditory.kttp.headers.HttpHeaders
 import com.coditory.kttp.serialization.SerDeserializer
 import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpRequest
-import com.coditory.kttp.server.core.HttpTreeRouter
+import com.coditory.kttp.server.core.HttpExchangeExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
@@ -19,7 +19,7 @@ import com.sun.net.httpserver.HttpHandler as JdkHttpHandler
 internal class JdkHttpExchangeHandler(
     private val requestScope: CoroutineScope,
     private val serde: SerDeserializer,
-    private val router: HttpTreeRouter,
+    private val executor: HttpExchangeExecutor,
 ) : JdkHttpHandler {
     override fun handle(jdkExchange: JdkHttpExchange) {
         requestScope.launch {
@@ -30,7 +30,7 @@ internal class JdkHttpExchangeHandler(
     private suspend fun handleAndCatch(jdkExchange: JdkHttpExchange) {
         try {
             val exchange = buildExchange(jdkExchange)
-            router.handle(exchange)
+            executor.execute(exchange)
         } catch (_: Throwable) {
             jdkExchange.sendResponseHeaders(500, 0)
         }
