@@ -18,7 +18,7 @@ publishing {
         }
         pom {
             name.set(project.name)
-            description.set(project.description ?: rootProject.description ?: "Kotlin logging library")
+            description.set(project.description ?: rootProject.description ?: "Kotlin HTTP library")
             url.set("https://github.com/coditory/kttp")
             organization {
                 name = "Coditory"
