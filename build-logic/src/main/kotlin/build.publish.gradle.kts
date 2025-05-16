@@ -69,15 +69,17 @@ tasks.register("artifactName") {
 }
 
 fun artifactName(): String {
-    var result = project.name
+    if (project == project.rootProject) {
+        return project.rootProject.name
+    }
+    val projectPrefix = project.rootProject.name + "-"
+    var result: String = project.name.removePrefix(projectPrefix)
     var proj = project.parent
     while (proj != null) {
-        result = proj.name + "-" + result
+        if (proj.name != project.rootProject.name) {
+            result = proj.name.removePrefix(projectPrefix) + "-" + result
+        }
         proj = proj.parent
     }
-    return if (result.startsWith("kttp-")) {
-        result
-    } else {
-        "kttp-$result"
-    }
+    return projectPrefix + result
 }
