@@ -20,12 +20,25 @@ class HttpPathPattern private constructor(
     }
 
     fun subPath(path: String): HttpPathPattern {
-        val normalized = normalizePath(path)
-        return HttpPathPattern(this.pattern + normalized)
+        val normalized = normalizePath(this.pattern + path)
+        return HttpPathPattern(normalized)
     }
 
     fun subPath(path: HttpPathPattern): HttpPathPattern {
-        return HttpPathPattern(this.pattern + path.pattern)
+        return subPath(path.pattern)
+    }
+
+    override fun toString(): String {
+        return pattern
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is HttpPathPattern) return false
+        return pattern == other.pattern
+    }
+
+    override fun hashCode(): Int {
+        return pattern.hashCode()
     }
 
     companion object {

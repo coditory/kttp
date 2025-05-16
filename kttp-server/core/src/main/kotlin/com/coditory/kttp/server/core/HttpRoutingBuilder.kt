@@ -2,13 +2,11 @@ package com.coditory.kttp.server.core
 
 import com.coditory.kttp.server.HttpFilter
 import com.coditory.kttp.server.HttpHandler
-import com.coditory.kttp.server.HttpMatchingFilter
-import com.coditory.kttp.server.HttpMatchingHandler
 import com.coditory.kttp.server.HttpRequestMatcher
 import com.coditory.kttp.server.HttpRoute
 
 internal class HttpRoutingBuilder(
-    private val parentMatcher: HttpRequestMatcher = HttpRequestMatcher.matchingAll(),
+    private val routingMatcher: HttpRequestMatcher = HttpRequestMatcher.matchingAll(),
 ) : HttpRoute {
     private val handlers = mutableListOf<HttpMatchingHandler>()
     private val filters = mutableListOf<HttpMatchingFilter>()
@@ -26,8 +24,8 @@ internal class HttpRoutingBuilder(
         config: HttpRoute.() -> Unit,
     ) {
         require(!closed) { "Routing already closed for modifications" }
-        val childMatcher = parentMatcher.subMatcher(matcher)
-        val builder = HttpRoutingBuilder(childMatcher)
+        val subMatcher = routingMatcher.subMatcher(matcher)
+        val builder = HttpRoutingBuilder(subMatcher)
         with(builder, config)
         builder.close()
         this.handlers.addAll(builder.handlers)
@@ -40,7 +38,7 @@ internal class HttpRoutingBuilder(
     ) {
         require(!closed) { "Routing already closed for modifications" }
         val matchingFilter = HttpMatchingFilter(
-            matcher = parentMatcher.subMatcher(matcher),
+            matcher = routingMatcher.subMatcher(matcher),
             filter = filter,
         )
         filters.add(matchingFilter)
@@ -52,7 +50,7 @@ internal class HttpRoutingBuilder(
     ) {
         require(!closed) { "Routing already closed for modifications" }
         val matchingHandler = HttpMatchingHandler(
-            matcher = parentMatcher.subMatcher(matcher),
+            matcher = routingMatcher.subMatcher(matcher),
             handler = handler,
         )
         handlers.add(matchingHandler)

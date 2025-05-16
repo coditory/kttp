@@ -4,11 +4,10 @@ import com.coditory.kttp.HttpRequestHead
 import com.coditory.kttp.server.HttpChain
 import com.coditory.kttp.server.HttpFilter
 import com.coditory.kttp.server.HttpHandler
-import com.coditory.kttp.server.HttpMatchingFilter
-import com.coditory.kttp.server.HttpMatchingHandler
 import com.coditory.kttp.server.HttpRequestMatcher
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.HttpRouter
+import com.coditory.kttp.server.NotFoundHttpHandler
 
 internal class HttpTreeRouter(
     private val notFoundHandler: HttpHandler = NotFoundHttpHandler(),
@@ -17,10 +16,6 @@ internal class HttpTreeRouter(
 
     override fun chain(request: HttpRequestHead): HttpChain {
         return root.getChain(request, notFoundHandler)
-    }
-
-    override fun matchingHandlers(path: String): List<HttpRequestMatcher> {
-        return root.matchingHandlers(path)
     }
 
     private fun addHandlers(handlers: List<HttpMatchingHandler>) {

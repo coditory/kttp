@@ -39,10 +39,10 @@ object JdkHttpServerRunner {
             }
             routing("/*") {
                 get("/") {
-                    HttpResponse.TextResponse("Path: /other")
+                    HttpResponse.TextResponse("Path: /*")
                 }
                 get("/hello") {
-                    HttpResponse.TextResponse("Path: /other/hello")
+                    HttpResponse.TextResponse("Path: /*/hello")
                 }
             }
         }

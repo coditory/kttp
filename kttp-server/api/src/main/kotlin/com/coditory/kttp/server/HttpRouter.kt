@@ -6,5 +6,4 @@ interface HttpRouter : HttpRoute {
     fun removeHandler(handler: HttpHandler)
     fun removeFilter(filter: HttpFilter)
     fun chain(request: HttpRequestHead): HttpChain
-    fun matchingHandlers(path: String): List<HttpRequestMatcher>
 }

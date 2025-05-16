@@ -7,6 +7,7 @@ import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.HttpResponseSender
 import com.coditory.kttp.server.HttpRouter
+import com.coditory.kttp.server.NotFoundHttpHandler
 
 class HttpExchangeExecutor private constructor(
     private val responseSender: HttpResponseSender,

@@ -19,13 +19,13 @@ interface HttpRequestMatcher {
     val pathPattern: HttpPathPattern?
     val consumes: Set<ContentType>
     val produces: Set<ContentType>
-    val predicate: HttpRequestPredicate
+    val predicate: HttpRequestPredicate?
 
     fun matches(request: HttpRequestHead): Boolean = matchesPath(request.uri.path) &&
         matchesMethod(request.method) &&
         matchesAccept(request.headers.accept()) &&
         matchesContentType(request.headers.contentType()) &&
-        predicate.accepts(request)
+        predicate?.accepts(request) ?: true
 
     fun matchesPath(path: String): Boolean
     fun matchesMethod(method: HttpRequestMethod): Boolean
@@ -49,7 +49,7 @@ interface HttpRequestMatcher {
             methods: Set<HttpRequestMethod> = emptySet(),
             consumes: Set<ContentType> = emptySet(),
             produces: Set<ContentType> = emptySet(),
-            predicate: HttpRequestPredicate = HttpRequestPredicate.acceptsAll(),
+            predicate: HttpRequestPredicate? = null,
         ): HttpRequestMatcher = HttpStaticRequestMatcher(
             methods = methods,
             pathPattern = pathPattern,
@@ -65,7 +65,7 @@ private data class HttpStaticRequestMatcher(
     override val pathPattern: HttpPathPattern?,
     override val consumes: Set<ContentType>,
     override val produces: Set<ContentType>,
-    override val predicate: HttpRequestPredicate,
+    override val predicate: HttpRequestPredicate? = null,
 ) : HttpRequestMatcher {
     override fun matchesPath(path: String): Boolean {
         return this.pathPattern == null || this.pathPattern.matches(path)
@@ -103,16 +103,17 @@ private data class HttpStaticRequestMatcher(
         val otherPredicate = matcher.predicate
         return HttpRequestMatcher.from(
             pathPattern = if (this.pathPattern != null && otherPath != null) {
-                otherPath.subPath(this.pathPattern)
+                this.pathPattern.subPath(otherPath)
             } else {
                 otherPath ?: this.pathPattern
             },
             methods = otherMethods.ifEmpty { this.methods },
             consumes = otherConsumes.ifEmpty { this.consumes },
             produces = otherProduces.ifEmpty { this.produces },
-            predicate = { request: HttpRequestHead ->
-                this.predicate.accepts(request) &&
-                    otherPredicate.accepts(request)
+            predicate = when {
+                this.predicate == null && otherPredicate == null -> null
+                this.predicate != null -> this.predicate
+                else -> otherPredicate
             },
         )
     }

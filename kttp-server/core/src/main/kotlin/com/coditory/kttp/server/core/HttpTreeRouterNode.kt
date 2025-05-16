@@ -4,20 +4,11 @@ import com.coditory.kttp.HttpRequestHead
 import com.coditory.kttp.server.HttpChain
 import com.coditory.kttp.server.HttpFilter
 import com.coditory.kttp.server.HttpHandler
-import com.coditory.kttp.server.HttpMatchingFilter
-import com.coditory.kttp.server.HttpMatchingHandler
 
 internal class HttpTreeRouterNode {
     private val children = mutableMapOf<String, HttpTreeRouterNode>()
     private val handlers = mutableListOf<HttpMatchingHandler>()
     private val filters = mutableListOf<HttpMatchingFilter>()
-
-    fun matchingHandlers(path: String): List<HttpMatchingHandler> {
-        val pathChunks = path.split("/").filter { it.isNotEmpty() }
-        val result = mutableListOf<HttpMatchingHandler>()
-        matchingHandlers(pathChunks, path, result)
-        return result
-    }
 
     private fun matchingHandlers(chunks: List<String>, path: String, result: MutableList<HttpMatchingHandler>) {
         result.addAll(handlers.filter { it.matchesPath(path) })
