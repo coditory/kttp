@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "com.coditory.kttp"
-    description = "Kotlin HTTP layer"
+    description = "Kotlin HTTP library"
 }
 
 dependencies {
