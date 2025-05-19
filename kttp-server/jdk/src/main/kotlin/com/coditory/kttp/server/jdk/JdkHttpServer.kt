@@ -17,7 +17,7 @@ import java.net.InetSocketAddress
 import com.sun.net.httpserver.HttpServer as JdkHttpServer
 
 class JdkHttpServer(
-    val port: Int = Ports.getNextAvailable(),
+    val port: Int = Ports.getNextAvailable(8000),
     backlog: Int = 0,
     requestScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     responseWriteScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
