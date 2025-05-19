@@ -6,7 +6,8 @@
 
 **🚧 This library as under heavy development until release of version `1.x.x` 🚧**
 
-> Think kotlin HTTP layer with multiple implementation. Providing kotlin friendly API without extension functions.
+> Thin kotlin HTTP layer with multiple server/client implementations.
+> Provides coroutine friendly API without NO extension functions.
 
 ## Sample usage
 
@@ -19,7 +20,7 @@ Thin wrapper around [`com.sun.net.httpserver.HttpServer`](https://docs.oracle.co
 
 ```kts
 dependencies {
-  implementation("com.coditory.kttp:kttp-server-jdk:$version")
+  implementation("com.coditory.kttp:kttp-server-jdk:0.0.1")
 }
 ```
 
