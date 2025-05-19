@@ -1,7 +1,7 @@
 package com.coditory.kttp.server
 
-import com.coditory.kttp.headers.ContentType
 import com.coditory.kttp.headers.HttpHeaders
+import com.coditory.kttp.headers.MediaType
 import com.coditory.kttp.serialization.HttpSerDeserializer
 import com.coditory.kttp.serialization.Serializer
 
@@ -42,7 +42,7 @@ private class SerializingHttpResponseSender(
                 val req = exchange.request.toHead()
                 val body = serializer.serializeToString(resp.body, resp.serializer, req).toByteArray()
                 val headers = HttpHeaders.from(
-                    HttpHeaders.ContentType to ContentType.Application.Json.value,
+                    HttpHeaders.ContentType to MediaType.Application.Json.value,
                     HttpHeaders.ContentLength to body.size.toString(),
                 )
                 exchange.sendResponseHead(response.status, headers)
@@ -54,7 +54,7 @@ private class SerializingHttpResponseSender(
             is HttpResponse.TextResponse -> {
                 val body = response.body.toByteArray()
                 val headers = HttpHeaders.from(
-                    HttpHeaders.ContentType to ContentType.Text.Plain.value,
+                    HttpHeaders.ContentType to MediaType.Text.Plain.value,
                     HttpHeaders.ContentLength to body.size.toString(),
                 )
                 exchange.sendResponseHead(response.status, headers)

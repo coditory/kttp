@@ -2,8 +2,8 @@ package com.coditory.kttp.headers
 
 import com.coditory.kttp.HttpSerializable
 
-class HttpHeaderValue(
-    items: List<HttpHeaderValueItem>,
+data class HttpHeaderValue(
+    val items: List<HttpHeaderValueItem>,
 ) : HttpSerializable {
     constructor(
         value: CharSequence,
@@ -14,6 +14,11 @@ class HttpHeaderValue(
         vararg items: HttpHeaderValueItem,
     ) : this(items.toList())
 
+    fun sortedByQuality(): HttpHeaderValue {
+        val sorted = items.sortedBy { -1.0f * (it.quality() ?: 1.0f) }
+        return HttpHeaderValue(sorted)
+    }
+
     override fun toHttpString(builder: Appendable) {
         for (i in 0..items.size - 1) {
             if (i > 0) builder.append(',')
@@ -21,25 +26,8 @@ class HttpHeaderValue(
         }
     }
 
-    val items = items.sorted()
-
     fun with(other: HttpHeaderValue): HttpHeaderValue {
         return HttpHeaderValue(items + other.items)
-    }
-
-    override fun toString(): String {
-        return this::class.simpleName + items.toString()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as HttpHeaderValue
-        return items == other.items
-    }
-
-    override fun hashCode(): Int {
-        return items.hashCode()
     }
 
     companion object {
@@ -50,7 +38,7 @@ class HttpHeaderValue(
 data class HttpHeaderValueItem(
     val value: CharSequence,
     val params: HttpHeaderParams = HttpHeaderParams.empty(),
-) : HttpSerializable, Comparable<HttpHeaderValueItem> {
+) : HttpSerializable {
     override fun toHttpString(builder: Appendable) {
         headerValueToHttpString(builder, value)
         params.toHttpString(builder)
@@ -58,11 +46,6 @@ data class HttpHeaderValueItem(
 
     fun quality(): Float? {
         return params["q"]?.toFloatOrNull()
-    }
-
-    override fun compareTo(other: HttpHeaderValueItem): Int {
-        val q = this.quality() ?: 1.0f
-        return q.compareTo(other.quality() ?: 1.0f)
     }
 
     companion object {

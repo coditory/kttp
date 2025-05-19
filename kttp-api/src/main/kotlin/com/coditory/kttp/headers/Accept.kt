@@ -1,26 +1,41 @@
 package com.coditory.kttp.headers
 
-data class Accept(
-    val contentTypes: List<ContentType>,
-) {
-    val value by lazy { contentTypes.joinToString(",") { it.value } }
+import com.coditory.kttp.HttpSerializable
 
-    fun matches(contentType: ContentType): Boolean {
-        return contentTypes.any { it.matches(contentType) }
+data class Accept(
+    val mediaTypes: List<MediaType>,
+) : HttpSerializable {
+    val value by lazy { mediaTypes.joinToString(",") { it.value } }
+
+    override fun toString() = toHttpString()
+
+    override fun toHttpString(builder: Appendable) {
+        builder.append(value)
+    }
+
+    fun matches(mediaType: MediaType): Boolean {
+        return mediaTypes.any { it.contains(mediaType) }
+    }
+
+    fun sortedByQuality(): Accept {
+        val sorted = mediaTypes.sortedBy { -1.0f * (it.quality() ?: 1.0f) }
+        return Accept(sorted)
     }
 
     companion object {
         fun parse(values: List<String>): Accept? {
             val unsortedItems = values.flatMap { HttpHeaderValue.parse(it)?.items ?: emptyList() }
-            val sortedContentTypes = HttpHeaderValue(unsortedItems).items
-                .mapNotNull { ContentType.parse(it) }
-            return if (sortedContentTypes.isEmpty()) null else Accept(sortedContentTypes)
+            val sortedMediaTypes = HttpHeaderValue(unsortedItems)
+                .sortedByQuality()
+                .items
+                .mapNotNull { MediaType.parse(it) }
+            return if (sortedMediaTypes.isEmpty()) null else Accept(sortedMediaTypes)
         }
 
         fun parse(value: String): Accept? {
             val header = HttpHeaderValue.parse(value) ?: return null
-            val contentTypes = header.items.mapNotNull { ContentType.parse(it) }
-            return if (contentTypes.isEmpty()) null else Accept(contentTypes)
+            val mediaTypes = header.items.mapNotNull { MediaType.parse(it) }
+            return if (mediaTypes.isEmpty()) null else Accept(mediaTypes)
         }
     }
 }

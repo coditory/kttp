@@ -1,6 +1,6 @@
 package com.coditory.kttp.server.jdk
 
-import com.coditory.kttp.headers.ContentType
+import com.coditory.kttp.headers.MediaType
 import com.coditory.kttp.serialization.Serializer
 import com.coditory.kttp.server.HttpExchange
 import com.coditory.kttp.server.HttpResponse
@@ -35,7 +35,7 @@ class JdkHttpResponseSender(
                 val req = exchange.request.toHead()
                 val body = serializer.serializeToString(resp.body, resp.serializer, req).toByteArray()
                 writeScope.launch {
-                    jdkExchange.responseHeaders.add("Content-Type", ContentType.Application.Json.value)
+                    jdkExchange.responseHeaders.add("Content-Type", MediaType.Application.Json.value)
                     jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
                     jdkExchange.responseBody.use { out ->
                         out.write(body)
@@ -45,7 +45,7 @@ class JdkHttpResponseSender(
 
             is HttpResponse.TextResponse -> {
                 val body = response.body.toByteArray()
-                jdkExchange.responseHeaders.add("Content-Type", ContentType.Text.Plain.value)
+                jdkExchange.responseHeaders.add("Content-Type", MediaType.Text.Plain.value)
                 jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
                 writeScope.launch {
                     exchange.responseBody.use { out ->

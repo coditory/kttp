@@ -6,7 +6,7 @@ import com.coditory.kttp.MutableHttpParams
 import com.coditory.kttp.toMultiMap
 
 interface HttpHeaders : HttpParams, HttpSerializable {
-    fun contentType(): ContentType?
+    fun contentType(): MediaType?
     fun accept(): Accept?
 
     override fun toHttpString(builder: Appendable) {
@@ -201,7 +201,7 @@ class MutableHttpHeaders private constructor(
 
     private fun getParsed(key: String, parse: (v: String) -> Any?): Any? {
         return cache.getOrPut(key) {
-            val value = get(HttpHeaders.ContentType)
+            val value = get(key)
             if (value == null) {
                 null
             } else {
@@ -220,12 +220,12 @@ class MutableHttpHeaders private constructor(
         }
     }
 
-    override fun contentType(): ContentType? {
-        return getParsed(HttpHeaders.ContentType, ContentType::parse)
-            ?.let { it as ContentType }
+    override fun contentType(): MediaType? {
+        return getParsed(HttpHeaders.ContentType, MediaType::parse)
+            ?.let { it as MediaType }
     }
 
-    fun contentType(value: ContentType?) {
+    fun contentType(value: MediaType?) {
         setParsed(HttpHeaders.ContentType, value?.value)
     }
 

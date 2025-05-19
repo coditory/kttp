@@ -63,6 +63,12 @@ interface HttpParams {
 
     fun contains(name: String, values: List<String>): Boolean
 
+    fun containsAll(other: HttpParams): Boolean {
+        return other.toMap().entries.all { entry ->
+            this.contains(entry.key, entry.value)
+        }
+    }
+
     fun containsValue(value: String): Boolean
 
     fun names(): Set<String> = toMap().keys

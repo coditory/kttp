@@ -1,7 +1,7 @@
 package com.coditory.kttp.server
 
 import com.coditory.kttp.HttpRequestMethod
-import com.coditory.kttp.headers.ContentType
+import com.coditory.kttp.headers.MediaType
 
 interface HttpRoute {
     fun routing(matcher: HttpRequestMatcher, config: HttpRoute.() -> Unit)
@@ -9,8 +9,8 @@ interface HttpRoute {
     fun routing(
         path: String? = null,
         method: HttpRequestMethod? = null,
-        produces: ContentType? = null,
-        consumes: ContentType? = null,
+        produces: MediaType? = null,
+        consumes: MediaType? = null,
         predicate: HttpRequestPredicate? = null,
         config: HttpRoute.() -> Unit,
     ) {
@@ -26,7 +26,7 @@ interface HttpRoute {
 
     fun filter(matcher: HttpRequestMatcher, filter: HttpFilter)
 
-    fun filter(path: String? = null, method: HttpRequestMethod? = null, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, filter: HttpFilter) {
+    fun filter(path: String? = null, method: HttpRequestMethod? = null, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, filter: HttpFilter) {
         val matcher = HttpRequestMatcher.from(
             methods = method?.let { setOf(it) } ?: emptySet(),
             pathPattern = path?.let { HttpPathPattern.from(it) },
@@ -39,7 +39,7 @@ interface HttpRoute {
 
     fun handler(matcher: HttpRequestMatcher, handler: HttpHandler)
 
-    fun handler(path: String? = null, method: HttpRequestMethod? = null, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun handler(path: String? = null, method: HttpRequestMethod? = null, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         val matcher = HttpRequestMatcher.from(
             methods = method?.let { setOf(it) } ?: emptySet(),
             pathPattern = path?.let { HttpPathPattern.from(it) },
@@ -50,31 +50,31 @@ interface HttpRoute {
         handler(matcher, action)
     }
 
-    fun get(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun get(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.GET, produces, consumes, predicate, action)
     }
 
-    fun post(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun post(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.POST, produces, consumes, predicate, action)
     }
 
-    fun put(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun put(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.PUT, produces, consumes, predicate, action)
     }
 
-    fun delete(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun delete(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.DELETE, produces, consumes, predicate, action)
     }
 
-    fun patch(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun patch(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.PATCH, produces, consumes, predicate, action)
     }
 
-    fun head(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun head(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.HEAD, produces, consumes, predicate, action)
     }
 
-    fun options(path: String, produces: ContentType? = null, consumes: ContentType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
+    fun options(path: String, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, action: HttpHandler) {
         handler(path, HttpRequestMethod.OPTIONS, produces, consumes, predicate, action)
     }
 }
