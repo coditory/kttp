@@ -64,7 +64,7 @@ tasks.javadoc {
 
 tasks.register("artifactName") {
     doLast {
-        println(artifactName())
+        println(project.group.toString() + ":" + artifactName())
     }
 }
 
