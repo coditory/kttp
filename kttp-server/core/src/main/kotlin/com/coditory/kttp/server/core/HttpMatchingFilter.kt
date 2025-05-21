@@ -13,4 +13,10 @@ internal data class HttpMatchingFilter(
     override suspend fun doFilter(exchange: HttpExchange, chain: HttpChain): HttpResponse {
         return filter.doFilter(exchange, chain)
     }
+
+    companion object {
+        fun matchingAll(filter: HttpFilter): HttpMatchingFilter {
+            return HttpMatchingFilter(HttpRequestMatcher.matchingAll(), filter)
+        }
+    }
 }

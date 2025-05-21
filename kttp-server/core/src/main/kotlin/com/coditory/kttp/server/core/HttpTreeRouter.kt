@@ -7,12 +7,21 @@ import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpRequestMatcher
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.HttpRouter
-import com.coditory.kttp.server.NotFoundHttpHandler
+import com.coditory.kttp.server.handler.NotFoundHttpHandler
+import kotlin.reflect.KClass
 
 internal class HttpTreeRouter(
     private val notFoundHandler: HttpHandler = NotFoundHttpHandler(),
 ) : HttpRouter {
     private val root = HttpTreeRouterNode()
+
+    override fun hasHandler(request: HttpRequestHead): Boolean {
+        return root.getHandler(request) != null
+    }
+
+    override fun getRequestMatchers(path: String): List<HttpRequestMatcher> {
+        return root.getAllHandlers(path)
+    }
 
     override fun chain(request: HttpRequestHead): HttpChain {
         return root.getChain(request, notFoundHandler)
@@ -26,6 +35,10 @@ internal class HttpTreeRouter(
         root.addHandler(handler)
     }
 
+    override fun removeHandler(handler: KClass<HttpHandler>) {
+        root.removeHandler(handler)
+    }
+
     override fun removeHandler(handler: HttpHandler) {
         root.removeHandler(handler)
     }
@@ -36,6 +49,10 @@ internal class HttpTreeRouter(
 
     private fun addFilter(filter: HttpMatchingFilter) {
         root.addFilter(filter)
+    }
+
+    override fun removeFilter(filter: KClass<HttpFilter>) {
+        root.removeFilter(filter)
     }
 
     override fun removeFilter(filter: HttpFilter) {

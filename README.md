@@ -26,7 +26,6 @@ dependencies {
 
 ## TBD
 
-- Handle head
 - Handle 405 response - Method not allowed
 - Handle 406 response - Not Acceptable
 - Upload file

@@ -4,6 +4,7 @@ import com.coditory.kttp.HttpRequestHead
 import com.coditory.kttp.server.HttpChain
 import com.coditory.kttp.server.HttpFilter
 import com.coditory.kttp.server.HttpHandler
+import kotlin.reflect.KClass
 
 internal class HttpTreeRouterNode {
     private val children = mutableMapOf<String, HttpTreeRouterNode>()
@@ -38,8 +39,13 @@ internal class HttpTreeRouterNode {
         child.addHandler(pathChunks.drop(1), handler)
     }
 
+    fun removeHandler(handler: KClass<HttpHandler>) {
+        this.handlers.removeAll { it::class == handler || it::class == handler }
+        children.forEach { key, child -> child.removeHandler(handler) }
+    }
+
     fun removeHandler(handler: HttpHandler) {
-        this.handlers.filter { it != handler && it.handler != handler }
+        this.handlers.removeAll { it == handler || it.handler == handler }
         children.forEach { key, child -> child.removeHandler(handler) }
     }
 
@@ -59,8 +65,13 @@ internal class HttpTreeRouterNode {
         child.addFilter(pathChunks.drop(1), filter)
     }
 
+    fun removeFilter(filter: KClass<HttpFilter>) {
+        this.filters.removeAll { it::class == filter || it::class == filter }
+        children.forEach { key, child -> child.removeFilter(filter) }
+    }
+
     fun removeFilter(filter: HttpFilter) {
-        this.filters.filter { it != filter && it.filter != filter }
+        this.filters.removeAll { it != filter && it.filter != filter }
         children.forEach { key, child -> child.removeFilter(filter) }
     }
 
@@ -70,6 +81,18 @@ internal class HttpTreeRouterNode {
         val filters = findAllMatchingFilters(pathChunks, request)
         val handlerChain = HttpHandlerChain(handler)
         return buildFilterChain(filters, handlerChain)
+    }
+
+    fun getHandler(request: HttpRequestHead): HttpMatchingHandler? {
+        val pathChunks = request.uri.path.split("/").filter { it.isNotEmpty() }
+        return findFirstMatchingHandler(pathChunks, request)
+    }
+
+    fun getAllHandlers(path: String): List<HttpMatchingHandler> {
+        val pathChunks = path.split("/").filter { it.isNotEmpty() }
+        val result = mutableListOf<HttpMatchingHandler>()
+        findAllMatchingHandlers(pathChunks, path, result)
+        return result
     }
 
     private fun buildFilterChain(filters: List<HttpMatchingFilter>, terminating: HttpChain): HttpChain {
@@ -92,6 +115,19 @@ internal class HttpTreeRouterNode {
             if (childHandler != null) return childHandler
         }
         return null
+    }
+
+    private fun findAllMatchingHandlers(pathChunks: List<String>, path: String, result: MutableList<HttpMatchingHandler>) {
+        handlers.forEach {
+            if (it.matchesPath(path)) {
+                result.add(it)
+            }
+        }
+        for (childKey in listOf(pathChunks.firstOrNull(), "*", "**")) {
+            if (childKey == null) continue
+            val child = children[childKey] ?: continue
+            child.findAllMatchingHandlers(pathChunks.drop(1), path, result)
+        }
     }
 
     private fun findAllMatchingFilters(pathChunks: List<String>, request: HttpRequestHead): List<HttpMatchingFilter> {

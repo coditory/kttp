@@ -115,4 +115,28 @@ class MediaTypeSpec : FunSpec({
             }
         }
     }
+
+    context("should match MediaType with file ext") {
+        listOf(
+            tuple("image/png", listOf("png")),
+            tuple("application/json", listOf("json")),
+            tuple("application/vnd.ms-excel", listOf("xls", "xlm", "xla", "xlc", "xlt", "xlw")),
+        ).forEach { t ->
+            val exts = t.b
+            val firstExt = exts.first()
+            val mediaTypeValue = t.a
+            val mediaType = MediaType.parse(mediaTypeValue)!!
+            test("$mediaType -> $exts") {
+                MediaType.getAllFileExtByMediaType(mediaType) shouldBe exts
+                MediaType.getAllFileExtByMediaTypeValue(mediaTypeValue) shouldBe exts
+                MediaType.getExtByMediaTypeValue(mediaTypeValue) shouldBe firstExt
+                MediaType.getExtByMediaType(mediaType) shouldBe firstExt
+                mediaType.fileExt() shouldBe firstExt
+                exts.forEach { ext ->
+                    MediaType.getMediaTypeByExt(ext) shouldBe mediaType
+                    MediaType.getMediaTypeValueByExt(ext) shouldBe mediaTypeValue
+                }
+            }
+        }
+    }
 })

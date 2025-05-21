@@ -7,8 +7,8 @@ import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpRoute
 import com.coditory.kttp.server.HttpRouter
 import com.coditory.kttp.server.HttpServer
-import com.coditory.kttp.server.NotFoundHttpHandler
 import com.coditory.kttp.server.core.HttpExchangeExecutor
+import com.coditory.kttp.server.handler.NotFoundHttpHandler
 import com.coditory.quark.uri.Ports
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

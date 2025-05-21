@@ -1,5 +1,6 @@
 package com.coditory.kttp.server.jdk
 
+import com.coditory.kttp.headers.HttpHeaders
 import com.coditory.kttp.headers.MediaType
 import com.coditory.kttp.serialization.Serializer
 import com.coditory.kttp.server.HttpExchange
@@ -26,7 +27,10 @@ class JdkHttpResponseSender(
 
             is HttpResponse.StatusResponse -> {
                 writeScope.launch {
-                    jdkExchange.sendResponseHeaders(response.status.code, 0.toLong())
+                    response.headers.forEachEntry { name, value ->
+                        jdkExchange.responseHeaders.add(name, value)
+                    }
+                    jdkExchange.sendResponseHeaders(response.status.code, -1L)
                 }
             }
 
@@ -35,7 +39,12 @@ class JdkHttpResponseSender(
                 val req = exchange.request.toHead()
                 val body = serializer.serializeToString(resp.body, resp.serializer, req).toByteArray()
                 writeScope.launch {
-                    jdkExchange.responseHeaders.add("Content-Type", MediaType.Application.Json.value)
+                    response.headers.forEachEntry { name, value ->
+                        jdkExchange.responseHeaders.add(name, value)
+                    }
+                    if (!response.headers.contains(HttpHeaders.ContentType)) {
+                        jdkExchange.responseHeaders.add(HttpHeaders.ContentType, MediaType.Application.Json.value)
+                    }
                     jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
                     jdkExchange.responseBody.use { out ->
                         out.write(body)
@@ -45,7 +54,12 @@ class JdkHttpResponseSender(
 
             is HttpResponse.TextResponse -> {
                 val body = response.body.toByteArray()
-                jdkExchange.responseHeaders.add("Content-Type", MediaType.Text.Plain.value)
+                response.headers.forEachEntry { name, value ->
+                    jdkExchange.responseHeaders.add(name, value)
+                }
+                if (!response.headers.contains(HttpHeaders.ContentType)) {
+                    jdkExchange.responseHeaders.add(HttpHeaders.ContentType, MediaType.Text.Plain.value)
+                }
                 jdkExchange.sendResponseHeaders(response.status.code, body.size.toLong())
                 writeScope.launch {
                     exchange.responseBody.use { out ->

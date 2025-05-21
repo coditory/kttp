@@ -4,6 +4,8 @@ import com.coditory.kttp.HttpRequestMethod
 import com.coditory.kttp.headers.MediaType
 
 interface HttpRoute {
+    fun routing(config: HttpRoute.() -> Unit) = routing(HttpRequestMatcher.matchingAll(), config)
+
     fun routing(matcher: HttpRequestMatcher, config: HttpRoute.() -> Unit)
 
     fun routing(
@@ -24,6 +26,8 @@ interface HttpRoute {
         routing(matcher, config)
     }
 
+    fun filter(filter: HttpFilter) = filter(HttpRequestMatcher.matchingAll(), filter)
+
     fun filter(matcher: HttpRequestMatcher, filter: HttpFilter)
 
     fun filter(path: String? = null, method: HttpRequestMethod? = null, produces: MediaType? = null, consumes: MediaType? = null, predicate: HttpRequestPredicate? = null, filter: HttpFilter) {
@@ -36,6 +40,8 @@ interface HttpRoute {
         )
         filter(matcher, filter)
     }
+
+    fun handler(handler: HttpHandler) = handler(HttpRequestMatcher.matchingAll(), handler)
 
     fun handler(matcher: HttpRequestMatcher, handler: HttpHandler)
 

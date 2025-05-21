@@ -7,7 +7,10 @@ import com.coditory.kttp.server.HttpHandler
 import com.coditory.kttp.server.HttpResponse
 import com.coditory.kttp.server.HttpResponseSender
 import com.coditory.kttp.server.HttpRouter
-import com.coditory.kttp.server.NotFoundHttpHandler
+import com.coditory.kttp.server.filter.HeadHttpFilter
+import com.coditory.kttp.server.filter.NotAcceptableHttpFilter
+import com.coditory.kttp.server.filter.OptionsHttpFilter
+import com.coditory.kttp.server.handler.NotFoundHttpHandler
 
 class HttpExchangeExecutor private constructor(
     private val responseSender: HttpResponseSender,
@@ -19,6 +22,12 @@ class HttpExchangeExecutor private constructor(
         errorHandler: HttpErrorHandler = HttpErrorHandler.default(),
         notFoundHandler: HttpHandler = NotFoundHttpHandler(),
     ) : this(responseSender, errorHandler, HttpTreeRouter(notFoundHandler))
+
+    init {
+        router.filter(HeadHttpFilter(this))
+        router.filter(OptionsHttpFilter(this))
+        router.filter(NotAcceptableHttpFilter(this))
+    }
 
     private val log = Klog.logger(HttpRouter::class)
     private val exchangeMonitor = HttpExchangeCounter()

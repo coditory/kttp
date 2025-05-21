@@ -16,6 +16,21 @@ class HttpRequest(
     private val deserializer: Deserializer,
     val source: Source,
 ) {
+    fun copy(
+        method: HttpRequestMethod = this.method,
+        uri: URI = this.uri,
+        headers: HttpHeaders = this.headers,
+        source: Source = this.source,
+    ): HttpRequest {
+        return HttpRequest(
+            method = method,
+            uri = uri,
+            headers = headers,
+            source = source,
+            deserializer = this.deserializer,
+        )
+    }
+
     suspend fun readBodyAsString() = source.readString()
 
     suspend fun <T> readBodyAs(strategy: DeserializationStrategy<T>): T {
