@@ -1,8 +1,8 @@
 [versions]
 # Build tools
 java = "21"
-kotlin = "2.1.20"
-coroutines = "1.9.0"
+kotlin = "2.1.21"
+coroutines = "1.10.2"
 ktlint = "1.4.0"
 # Dependencies
 serialization = "1.8.1"
@@ -30,7 +30,7 @@ klog = { module = "com.coditory.klog:klog", version = "0.0.19" }
 # Test dependencies
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
-awaitility = { module = "org.awaitility:awaitility", version = "4.2.2" }
+awaitility = { module = "org.awaitility:awaitility", version = "4.3.0" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 [plugins]
