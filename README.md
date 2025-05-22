@@ -1,8 +1,8 @@
 # kttp - Kotlin HTTP
 
-[![Build](https://github.com/coditory/ktserver/actions/workflows/build.yml/badge.svg)](https://github.com/coditory/ktserver/actions/workflows/build.yml)
-[![Coverage](https://codecov.io/gh/coditory/ktserver/graph/badge.svg?token=FlAX0WyFod)](https://codecov.io/gh/coditory/ktserver)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.coditory.ktserver/ktserver/badge.svg)](https://mvnrepository.com/artifact/com.coditory.ktserver/ktserver)
+[![Build](https://github.com/coditory/kttp/actions/workflows/build.yml/badge.svg)](https://github.com/coditory/kttp/actions/workflows/build.yml)
+[![Coverage](https://codecov.io/gh/coditory/kttp/graph/badge.svg?token=FlAX0WyFod)](https://codecov.io/gh/coditory/kttp)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.coditory.kttp/kttp/badge.svg)](https://mvnrepository.com/artifact/com.coditory.kttp/kttp)
 
 **🚧 This library as under heavy development until release of version `1.x.x` 🚧**
 
