@@ -5,18 +5,15 @@ import kotlinx.io.Sink
 import kotlinx.io.Source
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.json.Json
 
 interface HttpSerDeserializer :
     HttpSerializer, HttpDeserializer, SerDeserializer {
     companion object {
-        private val DEFAULT by lazy {
-            CompositeHttpSerDeserializer(
-                serializer = HttpSerializer.default(),
-                deserializer = HttpDeserializer.default(),
-            )
-        }
-
-        fun default(): HttpSerDeserializer = DEFAULT
+        fun default(json: Json = Json): HttpSerDeserializer = CompositeHttpSerDeserializer(
+            serializer = HttpSerializer.default(json),
+            deserializer = HttpDeserializer.default(json),
+        )
 
         fun composite(
             serializer: HttpSerializer,

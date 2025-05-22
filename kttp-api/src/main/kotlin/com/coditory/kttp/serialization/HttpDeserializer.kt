@@ -9,22 +9,30 @@ interface HttpDeserializer : Deserializer {
     fun deserializationScore(request: HttpRequestHead): Int
 
     companion object {
-        fun default() = composite(listOf(JsonSerDeserializer.default(), FormUrlEncodedSerDeserializer.default()))
+        fun default(
+            json: Json = Json,
+            formUrlEncodedFormat: FormUrlEncodedFormat = FormUrlEncodedFormat(json.serializersModule),
+        ) = composite(
+            JsonSerDeserializer(json),
+            FormUrlEncodedSerDeserializer(formUrlEncodedFormat),
+        )
+
+        fun composite(vararg deserializers: HttpDeserializer): HttpDeserializer = CompositeHttpDeserializer(deserializers.toList())
 
         fun composite(
             deserializers: List<HttpDeserializer>,
-            defaultDeserializer: HttpDeserializer? = deserializers.first(),
+            defaultDeserializer: HttpDeserializer? = deserializers.firstOrNull(),
         ): HttpDeserializer = CompositeHttpDeserializer(deserializers, defaultDeserializer)
 
         fun json(json: Json = Json): HttpDeserializer = JsonSerDeserializer(json)
 
-        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat.default()): HttpDeserializer = FormUrlEncodedSerDeserializer(format)
+        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat()): HttpDeserializer = FormUrlEncodedSerDeserializer(format)
     }
 }
 
 private class CompositeHttpDeserializer(
     private val deserializers: List<HttpDeserializer>,
-    private val defaultDeserializer: HttpDeserializer? = null,
+    private val defaultDeserializer: HttpDeserializer? = deserializers.firstOrNull(),
 ) : HttpDeserializer {
     override fun deserializationScore(request: HttpRequestHead): Int {
         return deserializers

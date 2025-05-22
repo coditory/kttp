@@ -18,8 +18,8 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 
 class FormUrlEncodedFormat(
-    private val encodeDefaults: Boolean = true,
     override val serializersModule: SerializersModule = EmptySerializersModule(),
+    private val encodeDefaults: Boolean = true,
 ) : SerialFormat {
     fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String {
         val output = StringBuilder()
@@ -307,11 +307,5 @@ class FormUrlEncodedFormat(
         override fun decodeShort(): Short = unsupported()
         override fun decodeString(): String = unsupported()
         private fun unsupported(): Nothing = throw SerializationException("Primitive decoding is not supported")
-    }
-
-    companion object {
-        private val DEFAULT = FormUrlEncodedFormat()
-
-        fun default() = DEFAULT
     }
 }

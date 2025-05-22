@@ -58,10 +58,4 @@ class FormUrlEncodedSerDeserializer(
         val text = source.readString()
         return deserializeFromString(strategy, request, text)
     }
-
-    companion object {
-        private val DEFAULT by lazy { FormUrlEncodedSerDeserializer(FormUrlEncodedFormat.default()) }
-
-        fun default() = DEFAULT
-    }
 }

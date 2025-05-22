@@ -9,22 +9,30 @@ interface HttpSerializer : Serializer {
     fun serializationScore(request: HttpRequestHead): Int
 
     companion object {
-        fun default() = composite(listOf(JsonSerDeserializer.default(), FormUrlEncodedSerDeserializer.default()))
+        fun default(
+            json: Json = Json,
+            formUrlEncodedFormat: FormUrlEncodedFormat = FormUrlEncodedFormat(json.serializersModule),
+        ) = composite(
+            JsonSerDeserializer(json),
+            FormUrlEncodedSerDeserializer(formUrlEncodedFormat),
+        )
+
+        fun composite(vararg serializers: HttpSerializer): HttpSerializer = CompositeHttpSerializer(serializers.toList())
 
         fun composite(
             serializers: List<HttpSerializer>,
-            defaultSerializer: HttpSerializer? = serializers.first(),
+            defaultSerializer: HttpSerializer? = serializers.firstOrNull(),
         ): HttpSerializer = CompositeHttpSerializer(serializers, defaultSerializer)
 
         fun json(json: Json = Json): HttpSerializer = JsonSerDeserializer(json)
 
-        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat.default()): HttpSerializer = FormUrlEncodedSerDeserializer(format)
+        fun formUrlEncoded(format: FormUrlEncodedFormat = FormUrlEncodedFormat()): HttpSerializer = FormUrlEncodedSerDeserializer(format)
     }
 }
 
 private class CompositeHttpSerializer(
     private val serializers: List<HttpSerializer>,
-    private val defaultSerializer: HttpSerializer? = serializers.first(),
+    private val defaultSerializer: HttpSerializer? = serializers.firstOrNull(),
 ) : HttpSerializer {
     override fun serializationScore(request: HttpRequestHead): Int {
         return serializers

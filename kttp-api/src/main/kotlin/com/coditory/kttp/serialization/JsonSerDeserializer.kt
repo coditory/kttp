@@ -11,7 +11,7 @@ import kotlinx.serialization.json.io.decodeFromSource
 import kotlinx.serialization.json.io.encodeToSink
 
 class JsonSerDeserializer(
-    private val json: Json,
+    private val json: Json = Json,
 ) : HttpSerDeserializer {
     override fun serializationScore(request: HttpRequestHead): Int {
         val contentType = request.headers["Content-Type"]
@@ -56,11 +56,5 @@ class JsonSerDeserializer(
         source: Source,
     ): T {
         return json.decodeFromSource(strategy, source)
-    }
-
-    companion object {
-        private val DEFAULT by lazy { JsonSerDeserializer(Json) }
-
-        fun default() = DEFAULT
     }
 }
