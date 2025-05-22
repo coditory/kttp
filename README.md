@@ -20,7 +20,7 @@ Thin wrapper around [`com.sun.net.httpserver.HttpServer`](https://docs.oracle.co
 
 ```kts
 dependencies {
-  implementation("com.coditory.kttp:kttp-server-jdk:0.0.1")
+  implementation("com.coditory.kttp:kttp-server-jdk:0.0.2")
 }
 ```
 
